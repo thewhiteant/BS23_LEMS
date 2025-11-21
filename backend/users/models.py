@@ -1,21 +1,21 @@
+from django.contrib.auth.models import AbstractUser
 from django.db import models
-from django.utils import timezone
-from django.contrib.auth.hashers import make_password, check_password
 
-class users(models.Model):
-    user_id = models.AutoField(primary_key=True)
-    username = models.CharField(max_length=250, unique=True)
-    email = models.EmailField(unique=True)
-    password = models.CharField(max_length=255)  # Django hashed password
+class Users(AbstractUser):
     phone = models.CharField(max_length=20, blank=True, null=True)
     profile_image = models.ImageField(upload_to="users/profile/", blank=True, null=True)
-    is_admin = models.BooleanField(default=False)
-    date_join = models.DateTimeField(default=timezone.now)
     attend_number_of_event = models.PositiveIntegerField(default=0)
 
-    def set_password(self, raw_password):
-        self.password = make_password(raw_password)
-    def check_password(self, raw_password):
-        return check_password(raw_password, self.password)
-    def __str__(self):
-        return self.username
+
+#     # Built-in fields inherited from AbstractUser
+#     # id = AutoField(primary_key=True)  # automatically added
+#     # password = models.CharField(max_length=128)
+#     # last_login = models.DateTimeField(blank=True, null=True)
+#     # is_superuser = models.BooleanField(default=False)
+#     # username = models.CharField(max_length=150, unique=True)
+#     # first_name = models.CharField(max_length=150, blank=True)
+#     # last_name = models.CharField(max_length=150, blank=True)
+#     # email = models.EmailField(blank=True)
+#     # is_staff = models.BooleanField(default=False)
+#     # is_active = models.BooleanField(default=True)
+#     # date_joined = models.DateTimeField(auto_now_add=True)

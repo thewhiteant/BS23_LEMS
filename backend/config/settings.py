@@ -79,9 +79,15 @@ REST_FRAMEWORK = {
     )
 }
 
+
+
+
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=60),
-    "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
+    'ROTATE_REFRESH_TOKENS': True,
+    'BLACKLIST_AFTER_ROTATION': True,
+    'UPDATE_LAST_LOGIN': True,
 }
 
 
@@ -89,7 +95,7 @@ SIMPLE_JWT = {
 # URLs & TEMPLATES
 # ---------------------------------------------------------
 
-ROOT_URLCONF = 'backend.urls'
+ROOT_URLCONF = 'config.urls'
 
 TEMPLATES = [
     {
@@ -107,7 +113,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'backend.wsgi.application'
+WSGI_APPLICATION = 'config.wsgi.application'
 
 
 # ---------------------------------------------------------
@@ -122,7 +128,9 @@ DATABASES = {
 }
 
 
-# ---------------------------------------------------------
+
+AUTH_USER_MODEL = 'users.Users'
+# -AUTH_USER--------------------------------------------------------
 # PASSWORD VALIDATION
 # ---------------------------------------------------------
 

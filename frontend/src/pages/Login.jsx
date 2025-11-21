@@ -1,6 +1,7 @@
 // src/components/LoginPage.jsx
 import React, { useState } from "react";
 import logo from "../assets/logo.png";
+import { Link } from "react-router-dom";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -8,7 +9,6 @@ const Login = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Handle login logic here
     console.log("Email:", email, "Password:", password);
   };
 
@@ -44,17 +44,19 @@ const Login = () => {
           </div>
           <button
             type="submit"
-            className="w-full bg-blue-500 text-white p-2 rounded-md hover:bg-blue-600 transition"
-          >
+            className="w-full bg-blue-500 text-white p-2 rounded-md hover:bg-blue-600 transition">
             Login
           </button>
         </form>
         <p className="text-sm text-gray-500 text-center mt-4">
-          Don't have an account? <a href="#" className="text-blue-500">Sign up</a>
+          Don't have an account? <a href="#" className="text-blue-500"> <Link to="/signup">Sign up</Link></a>
+        </p>
+        <p className="text-sm text-gray-500 text-center mt-4">
+           <a href="#" className="text-blue-500"> <Link to="/">forgot password</Link></a>
         </p>
       </div>
     </div>
-  );S
+  );
 };
 
 export default Login;

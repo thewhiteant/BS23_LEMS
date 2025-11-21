@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import logo from "../assets/logo.png";
+import { Link } from "react-router-dom";
 
 const Signup = () => {
   const [username, setUsername] = useState("");
@@ -8,14 +9,44 @@ const Signup = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [phone, setPhone] = useState("");
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (password !== confirmPassword) {
       alert("Passwords do not match!");
       return;
     }
-    console.log("Username:", username, "Email:", email, "Password:", password, "Phone:", phone);
+
+
+    if (!username) return setMessage("Username is required");
+    if (!email) return setMessage("Email is required");
+    if (!password) return setMessage("Password is required");
+
+
+    try{
+
+        const resp = await api.post("register/",{
+                  username:username,
+                  email:email,
+                  password:password,
+                  confirm_password : confirmPassword,
+                  phone:phone 
+        });
+
+
+      setMessage("Signup successful!");
+      setUsername("");
+      setEmail("");
+      setPassword("");
+
+    } catch(err){
+          setMessage("Signup failed. Check your info.");
+
+    }
+
+
+
   };
+
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
@@ -82,13 +113,12 @@ const Signup = () => {
           </div>
           <button
             type="submit"
-            className="w-full bg-blue-500 text-white p-2 rounded-md hover:bg-blue-600 transition"
-          >
+            className="w-full bg-blue-500 text-white p-2 rounded-md hover:bg-blue-600 transition">
             Sign Up
           </button>
         </form>
         <p className="text-sm text-gray-500 text-center mt-4">
-          Already have an account? <a href="#" className="text-blue-500">Login</a>
+          Already have an account? <a href="#" className="text-blue-500"><Link to={"/login"}>Login</Link> </a>
         </p>
       </div>
     </div>
