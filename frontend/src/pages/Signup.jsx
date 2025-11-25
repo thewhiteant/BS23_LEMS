@@ -1,6 +1,9 @@
 import React, { useState } from "react";
 import logo from "../assets/logo.png";
 import { Link } from "react-router-dom";
+import api from "../services/api";
+
+
 
 const Signup = () => {
   const [username, setUsername] = useState("");
@@ -8,6 +11,7 @@ const Signup = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [phone, setPhone] = useState("");
+  const [message, setMessage] = useState(""); // to show success or error messages
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -24,11 +28,11 @@ const Signup = () => {
 
     try{
 
-        const resp = await api.post("register/",{
+        const response = await api.post("register/",{
                   username:username,
                   email:email,
                   password:password,
-                  confirm_password : confirmPassword,
+                  password_confirm : confirmPassword,
                   phone:phone 
         });
 
@@ -37,6 +41,7 @@ const Signup = () => {
       setUsername("");
       setEmail("");
       setPassword("");
+      window.location.href = "/login";
 
     } catch(err){
           setMessage("Signup failed. Check your info.");

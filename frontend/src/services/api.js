@@ -2,10 +2,10 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'http://localhost:8000/user/', // Change to your real backend later
+  baseURL: 'http://localhost:8000/user/', 
   timeout: 10000,
   headers: {
-    'Content-Type': 'application/json',  // This is VERY important!
+    'Content-Type': 'application/json', 
     'Accept': 'application/json',
   },
 });
