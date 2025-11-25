@@ -12,37 +12,68 @@ from .serializers import (
 )
 
 
+#Understand
 class RegisterView(APIView):
     permission_classes = [AllowAny]
-
     def post(self, request):
         serializer = RegisterSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
-        return Response({
-            "message": "User registered successfully",
-            "user": {
-                "id": user.id,
-                "username": user.username,
-                "email": user.email
-            }
-        }, status=status.HTTP_201_CREATED)
-
+        return Response({"message": "User registered successfully",}, status=status.HTTP_201_CREATED)
+    
     def get(self,request):
-        
-        return Response({
-            "message": "Method Not Allowed"
-        },status=status.HTTP_405_METHOD_NOT_ALLOWED)
+        return Response({"message": "Method Not Allowed"},status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
 
 class LoginView(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
+        
         serializer = LoginSerializer(data=request.data, context={'request': request})
         serializer.is_valid(raise_exception=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
     
+
+      
+    def get(self,request):
+        return Response({"message": "Method Not Allowed"},status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 class ProfileView(APIView):

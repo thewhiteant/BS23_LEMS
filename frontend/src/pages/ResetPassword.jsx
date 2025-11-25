@@ -1,31 +1,35 @@
-// src/components/LoginPage.jsx
+// src/components/ResetPassword.jsx
 import React, { useState } from "react";
 import logo from "../assets/logo.png";
-import { Link } from "react-router-dom";
 import api from "../services/api";
+import { useParams, Link } from "react-router-dom";
 
-const Login = () => {
-  const [username, setUsername] = useState("");
+const ResetPassword = () => {
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [message, setMessage] = useState("");
+
+  const { token } = useParams(); // assuming the reset token comes from URL
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    if (password !== confirmPassword) {
+      setMessage("Passwords do not match!");
+      return;
+    }
+
     try {
-      const response = await api.post("login/", {
-        username,
+      await api.post("reset-password/", {
+        token,
         password,
+        password_confirm: confirmPassword,
       });
-
-      localStorage.setItem("access_token", response.data.tokens.access);
-      localStorage.setItem("refresh_token", response.data.tokens.refresh);
-
-      setMessage("Login successful!");
-      window.location.href = "/";
-    } catch (error) {
-      console.log(error.response?.data);
-      setMessage("Login failed. Check username or password.");
+      setMessage("Password reset successful! You can now login.");
+      setPassword("");
+      setConfirmPassword("");
+    } catch (err) {
+      setMessage("Failed to reset password. Try again.");
     }
   };
 
@@ -36,31 +40,29 @@ const Login = () => {
           <img src={logo} alt="Logo" className="h-25 w-35 object-contain" />
         </div>
         <h2 className="text-2xl font-bold text-center mb-6 text-white">
-          Login to Your Account
+          Reset Password
         </h2>
-        {message && (
-          <p className="text-center mb-4 text-red-400">{message}</p>
-        )}
+        {message && <p className="text-center mb-4 text-green-400">{message}</p>}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-gray-300 mb-1">Username</label>
-            <input
-              type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              className="w-full bg-gray-700 border border-gray-600 rounded-md p-2 text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Enter your username"
-              required
-            />
-          </div>
-          <div>
-            <label className="block text-gray-300 mb-1">Password</label>
+            <label className="block text-gray-300 mb-1">New Password</label>
             <input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="w-full bg-gray-700 border border-gray-600 rounded-md p-2 text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Enter your password"
+              placeholder="Enter new password"
+              required
+            />
+          </div>
+          <div>
+            <label className="block text-gray-300 mb-1">Confirm Password</label>
+            <input
+              type="password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              className="w-full bg-gray-700 border border-gray-600 rounded-md p-2 text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Confirm new password"
               required
             />
           </div>
@@ -68,18 +70,13 @@ const Login = () => {
             type="submit"
             className="w-full bg-blue-600 text-white p-2 rounded-md hover:bg-blue-700 transition"
           >
-            Login
+            Reset Password
           </button>
         </form>
         <p className="text-sm text-gray-400 text-center mt-4">
-          Don't have an account?{" "}
-          <Link to="/signup" className="text-blue-500 hover:underline">
-            Sign up
-          </Link>
-        </p>
-        <p className="text-sm text-gray-400 text-center mt-2">
-          <Link to="/forgate" className="text-blue-500 hover:underline">
-            Forgot password?
+          Back to{" "}
+          <Link to="/login" className="text-blue-500 hover:underline">
+            Login
           </Link>
         </p>
       </div>
@@ -87,4 +84,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default ResetPassword;

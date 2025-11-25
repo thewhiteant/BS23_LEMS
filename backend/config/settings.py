@@ -75,9 +75,11 @@ REST_FRAMEWORK = {
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
     'DEFAULT_PERMISSION_CLASSES': (
-        'rest_framework.permissions.AllowAny',
+        'rest_framework.permissions.IsAuthenticated',
     )
 }
+
+
 
 
 
@@ -130,6 +132,8 @@ DATABASES = {
 
 
 AUTH_USER_MODEL = 'users.Users'
+
+
 # -AUTH_USER--------------------------------------------------------
 # PASSWORD VALIDATION
 # ---------------------------------------------------------
@@ -168,3 +172,6 @@ MEDIA_ROOT = BASE_DIR / "media"
 # ---------------------------------------------------------
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+

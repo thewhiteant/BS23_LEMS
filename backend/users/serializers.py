@@ -24,48 +24,95 @@ class RegisterSerializer(serializers.ModelSerializer):
         user.save()
         return user
 
-
 class LoginSerializer(serializers.Serializer):
+
     username = serializers.CharField()
     password = serializers.CharField(write_only=True)
 
     def validate(self, attrs):
-        try:
-            user = Users.objects.get(username=attrs['username'])
-        except Users.DoesNotExist:
-            raise serializers.ValidationError("Invalid username or password.")
+        username_or_email = attrs['username']
+        password = attrs['password']
 
-        if not user.check_password(attrs['password']):
-            raise serializers.ValidationError("Invalid username or password.")
+        user = Users.objects.filter(email=username_or_email).first()
+        
+        #email check
+        if not user:
+            user = Users.objects.filter(username=username_or_email).first()
+
+        # usename check
+        if not user:
+            raise serializers.ValidationError("Invalid username/email or password.")
+        
+        #password check
+        if not user.check_password(password):
+            raise serializers.ValidationError("Invalid username/email or password.")
+
 
         attrs['user'] = user
         return attrs
 
+
     def to_representation(self, instance):
         user = instance['user']
         refresh = RefreshToken.for_user(user)
-        request = self.context.get('request')
 
-        profile_image = user.profile_image.url if user.profile_image else None
-        if profile_image and request:
-            profile_image = request.build_absolute_uri(profile_image)
+        # Prepare user data using UserResponseSerializer
+        user_data = UserResponseSerializer(
+            user,
+            context=self.context  # required for profile image absolute URL
+        ).data
+
+        # Token data
+        token_data = {
+            "refresh": str(refresh),
+            "access": str(refresh.access_token)
+        }
 
         return {
-            "user": {
-                "id": user.id,
-                "username": user.username,
-                "email": user.email,
-                "phone": user.phone or "",
-                "profile_image": profile_image,
-                "is_staff": user.is_staff,
-                "date_joined": user.date_joined.isoformat(),
-                "attend_number_of_event": user.attend_number_of_event,
-            },
-            "tokens": {
-                "refresh": str(refresh),
-                "access": str(refresh.access_token)
-            }
+            "user": user_data,
+            "tokens": token_data
         }
+
+
+#user data representaion serializer
+class UserResponseSerializer(serializers.ModelSerializer):
+    profile_image = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Users
+        fields = [
+            "id",
+            "username",
+            "email",
+            "phone",
+            "profile_image",
+            "is_staff",
+            "date_joined",
+            "attend_number_of_event",
+        ]
+
+    def get_profile_image(self, obj):
+        request = self.context.get("request")
+        if obj.profile_image:
+            url = obj.profile_image.url
+            return request.build_absolute_uri(url) if request else url
+        return None
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -74,7 +121,9 @@ class ProfileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Users
-        fields = ['id', 'username', 'email', 'phone', 'profile_image', 'is_staff', 'date_joined', 'attend_number_of_event']
+        fields = [
+            'id', 
+            'username', 'email', 'phone', 'profile_image', 'is_staff', 'date_joined', 'attend_number_of_event']
         read_only_fields = ['id', 'is_staff', 'date_joined', 'attend_number_of_event']
 
     def get_profile_image(self, obj):
