@@ -10,7 +10,13 @@ class Events(models.Model):
     price = models.IntegerField(default=0)
     event_cover = models.ImageField(upload_to="media/events/", blank=True, null=True)
 
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+
     def __str__(self):
         return self.title
     
+    class Meta:                       
+        verbose_name_plural = "Events"
         
