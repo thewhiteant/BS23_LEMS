@@ -1,5 +1,6 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django.utils import timezone
 
 class Users(AbstractUser):
     email = models.EmailField(unique=True)
@@ -7,9 +8,8 @@ class Users(AbstractUser):
     profile_image = models.ImageField(upload_to="users/profile/", blank=True, null=True)
     attend_number_of_event = models.PositiveIntegerField(default=0)
 
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
+    created_at = models.DateTimeField(default=timezone.now)
+    updated_at = models.DateTimeField(default=timezone.now)
 
 
 
