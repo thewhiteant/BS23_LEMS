@@ -1,14 +1,14 @@
 // src/components/LoginPage.jsx
 import React, { useState } from "react";
-import logo from "../assets/logo.png";
-import { Link } from "react-router-dom";
-import api from "../services/api";
-
+import logo from "../../assets/logo.png";
+import { Link, Navigate } from "react-router-dom";
+import api from "../../services/api";
+import { useNavigate } from "react-router-dom";
 const Login = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
-
+  const navigate = useNavigate();
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -22,7 +22,7 @@ const Login = () => {
       localStorage.setItem("refresh_token", response.data.tokens.refresh);
 
       setMessage("Login successful!");
-      window.location.href = "/";
+      navigate("/event")
     } catch (error) {
       console.log(error.response?.data);
       setMessage("Login failed. Check username or password.");

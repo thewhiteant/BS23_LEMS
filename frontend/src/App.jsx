@@ -1,6 +1,10 @@
 import React from "react";
-import Login from "./pages/Login";
-import Signup from "./pages/Signup";
+// import Login from "./pages/auth/login";
+// import Signup from "./pages/Signup";
+import HeroSlider from "./components/autoSlider";
+
+
+
 
 function App() {
 
@@ -9,13 +13,7 @@ function App() {
 
   return (
     <div>
-      <main>
-
-        <h1>This is Main App</h1>  
-        <p>Access Token: {access ? access : "No access token"}</p>
-        <p>Refresh Token: {refresh ? refresh : "No refresh token"}</p>
-
-      </main>
+      {/* <HeroSlider/> */}
     </div>
   );
 }

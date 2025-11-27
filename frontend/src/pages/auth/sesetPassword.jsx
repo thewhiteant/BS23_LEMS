@@ -1,7 +1,7 @@
 // src/components/ResetPassword.jsx
 import React, { useState } from "react";
-import logo from "../assets/logo.png";
-import api from "../services/api";
+import logo from "../../assets/logo.png";
+import api from "../../services/api";
 import { useParams, Link } from "react-router-dom";
 
 const ResetPassword = () => {

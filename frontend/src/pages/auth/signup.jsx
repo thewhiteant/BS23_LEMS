@@ -1,8 +1,8 @@
 // src/components/Signup.jsx
 import React, { useState } from "react";
-import logo from "../assets/logo.png";
+import logo from "../../assets/logo.png";
 import { Link } from "react-router-dom";
-import api from "../services/api";
+import api from "../../services/api";
 
 const Signup = () => {
   const [username, setUsername] = useState("");

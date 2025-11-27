@@ -33,7 +33,7 @@ class AddEventView(APIView):
 
 class EditEventView(APIView):
     permission_classes = [IsAuthenticated]
-    def get(self,request,pk):
+    def get(self,request, pk):
         event = get_object_or_404(Events,pk=pk)
         serializer = EventSerializer(event)
         return Response(serializer.data)
