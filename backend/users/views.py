@@ -3,6 +3,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
+from .models import Users
 
 from .serializers import (
     RegisterSerializer,
@@ -38,11 +39,6 @@ class LoginView(APIView):
       
     def get(self,request):
         return Response({"message": "Method Not Allowed"},status=status.HTTP_405_METHOD_NOT_ALLOWED)
-
-
-
-
-
 
 
 

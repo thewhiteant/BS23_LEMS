@@ -8,3 +8,5 @@ class RSVPSerializer(serializers.ModelSerializer):
     class Meta:
         model = RSVP
         fields = "__all__"
+
+
