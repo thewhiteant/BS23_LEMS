@@ -4,7 +4,18 @@ const EventCard = ({ event }) => {
   const { image, title, description, dateTime, location } = event;
 
   return (
-    <div className="bg-gray-50/90 backdrop-blur-sm rounded-xl shadow-md hover:shadow-xl transition-shadow duration-300 w-full md:w-80 lg:w-96">
+    <div
+      className="
+        bg-gray-50/90 backdrop-blur-sm rounded-xl shadow-md hover:shadow-xl 
+        transition-shadow duration-300 
+        
+        w-full 
+        max-w-[360px]      /* prevents huge stretching */
+        sm:max-w-[300px]   /* small screens */
+        md:max-w-[320px]   /* tablets */
+        lg:max-w-[350px]   /* desktops */
+      "
+    >
       {/* Event Image */}
       <img
         src={image}
@@ -15,7 +26,9 @@ const EventCard = ({ event }) => {
       {/* Event Content */}
       <div className="p-4 flex flex-col gap-3">
         {/* Title */}
-        <h2 className="text-xl md:text-2xl font-bold text-gray-800">{title}</h2>
+        <h2 className="text-xl md:text-2xl font-bold text-gray-800">
+          {title}
+        </h2>
 
         {/* Description */}
         <p className="text-gray-600 text-sm md:text-base line-clamp-3">
@@ -24,8 +37,12 @@ const EventCard = ({ event }) => {
 
         {/* Time & Location */}
         <div className="mt-2 flex flex-col gap-1 text-gray-500 text-sm">
-          <span><strong>Time:</strong> {dateTime}</span>
-          <span><strong>Location:</strong> {location}</span>
+          <span>
+            <strong>Time:</strong> {dateTime}
+          </span>
+          <span>
+            <strong>Location:</strong> {location}
+          </span>
         </div>
 
         {/* Attend Button */}
