@@ -52,12 +52,12 @@ const Dashboard = () => {
   const visibleEvents = filtered.slice(0, visibleCount);
 
   return (
-    <div className=" min-h-screen flex flex-col bg-gradient-to-b from-white to-gray-50">
+    <div className="min-h-screen flex flex-col bg-gradient-to-b from-white to-gray-50">
       {/* HERO */}
       <HeroSlider />
 
       {/* PAGE CONTAINER */}
-      <main className="mt-10 md:mt-14 w-full max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 -mt-10 mb-12">
+      <main className="m-10 p-[10px]">
         {/* TITLE */}
         <div className="mb-6">
           <h1 className="text-cherry font-extrabold text-3xl sm:text-4xl md:text-5xl leading-tight">
@@ -122,36 +122,31 @@ const Dashboard = () => {
           </div>
         </section>
 
-        {/* EVENTS GRID */}
-        <section aria-label="Events list">
-          {filtered.length === 0 ? (
-            <div className="py-12 text-center text-gray-500">No events found.</div>
-          ) : (
-            <div className="
-              grid grid-cols-1 
-              sm:grid-cols-2 
-              md:grid-cols-3 
-              lg:grid-cols-4 
-              gap-6 place-items-center
-            ">
-              {visibleEvents.map((ev, i) => (
-                <EventCard key={`${ev.title}-${i}`} event={ev} />
-              ))}
-            </div>
-          )}
+    <section aria-label="Events list">
+        {filtered.length === 0 ? (
+          <div className="py-12 text-center text-gray-500">No events found.</div>
+        ) : (
+          <div className="grid grid-cols-[repeat(auto-fit,minmax(250px,1fr))] gap-5">
+            {visibleEvents.map((ev, i) => (
+              <EventCard key={`${ev.title}-${i}`} event={ev} />
+            ))}
+          </div>
+        )}
 
-          {/* LOAD MORE */}
-          {visibleCount < filtered.length && (
-            <div className="mt-8 flex justify-center">
-              <button
-                onClick={() => setVisibleCount((v) => v + 8)}
-                className="px-5 py-3 bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition"
-              >
-                Load more
-              </button>
-            </div>
-          )}
-        </section>
+        {visibleCount < filtered.length && (
+          <div className="mt-8 flex justify-center">
+            <button
+              onClick={() => setVisibleCount((v) => v + 8)}
+              className="px-5 py-3 bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition"
+            >
+              Load more
+            </button>
+          </div>
+        )}
+    </section>
+
+
+
       </main>
 
       <Footer />
