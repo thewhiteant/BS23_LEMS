@@ -10,10 +10,10 @@ const EventCard = ({ event }) => {
         transition-shadow duration-300 
         
         w-full 
-        max-w-[360px]      /* prevents huge stretching */
-        sm:max-w-[300px]   /* small screens */
-        md:max-w-[320px]   /* tablets */
-        lg:max-w-[350px]   /* desktops */
+        max-w-[380px]      /* wider default */
+        sm:max-w-[340px]   /* wider on small screens */
+        md:max-w-[360px]   /* wider on tablets */
+        lg:max-w-[400px]   /* wider on desktops */
       "
     >
       {/* Event Image */}
@@ -26,9 +26,7 @@ const EventCard = ({ event }) => {
       {/* Event Content */}
       <div className="p-4 flex flex-col gap-3">
         {/* Title */}
-        <h2 className="text-xl md:text-2xl font-bold text-gray-800">
-          {title}
-        </h2>
+        <h2 className="text-xl md:text-2xl font-bold text-gray-800">{title}</h2>
 
         {/* Description */}
         <p className="text-gray-600 text-sm md:text-base line-clamp-3">

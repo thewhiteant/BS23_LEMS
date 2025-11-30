@@ -7,14 +7,17 @@ import Signup from "./pages/auth/signup";
 import ForgotPassword from "./pages/auth/forgatePassowrd";
 import ResetPassword from "./pages/auth/sesetPassword";
 import Dashbord from "./pages/event/dashboard";
-
+import EventPage from "./pages/event/eventPage";
 const router = createBrowserRouter([
   { path: "/", element: <App /> },
   { path: "/login", element: <Login /> },
   { path: "/signup", element: <Signup /> },
   { path: "/forgate", element: <ForgotPassword/> },
   { path: "/reset" , element:<ResetPassword/>},
-  { path: "/events",element: <Dashbord/> }
+  { path: "/events",element: <Dashbord/> },
+  { path: "/event",element:  <EventPage/> },
+  // { path: "/user",element:  </>}
+  
 ]);
 
 

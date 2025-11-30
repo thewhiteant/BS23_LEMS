@@ -3,6 +3,8 @@ import { useMemo, useState } from "react";
 import HeroSlider from "../../components/autoSlider";
 import EventCard from "../../components/eventCard";
 import Footer from "../../components/Footer";
+import ProfileMenu from "../../components/ProfileMenu";
+
 import cover from "../../assets/images/cover.jpg";
 
 const sampleEvent = {
@@ -15,7 +17,6 @@ const sampleEvent = {
 };
 
 const Dashboard = () => {
-  // demo sample list
   const initialEvents = useMemo(
     () =>
       Array.from({ length: 12 }).map((_, i) => ({
@@ -34,12 +35,13 @@ const Dashboard = () => {
   const [locationFilter, setLocationFilter] = useState("all");
   const [visibleCount, setVisibleCount] = useState(8);
 
-  // filtering
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     return initialEvents.filter((ev) => {
-      if (locationFilter === "dhaka" && !/dhaka/i.test(ev.location)) return false;
-      if (locationFilter === "online" && /dhaka/i.test(ev.location)) return false;
+      if (locationFilter === "dhaka" && !/dhaka/i.test(ev.location))
+        return false;
+      if (locationFilter === "online" && /dhaka/i.test(ev.location))
+        return false;
       if (!q) return true;
       return (
         ev.title.toLowerCase().includes(q) ||
@@ -53,19 +55,23 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-white to-gray-50">
-      {/* HERO */}
       <HeroSlider />
 
-      {/* PAGE CONTAINER */}
       <main className="m-10 p-[10px]">
-        {/* TITLE */}
-        <div className="mb-6">
-          <h1 className="text-cherry font-extrabold text-3xl sm:text-4xl md:text-5xl leading-tight">
-            All Events
-          </h1>
-          <p className="text-sm text-gray-500 mt-1">
-            Browse upcoming events, workshops and meetups.
-          </p>
+
+        {/* TITLE + PROFILE BUTTON */}
+        <div className="mb-6 flex items-center justify-between">
+          <div>
+            <h1 className="text-cherry font-extrabold text-3xl sm:text-4xl md:text-5xl leading-tight">
+              All Events
+            </h1>
+            <p className="text-sm text-gray-500 mt-1">
+              Browse upcoming events, workshops and meetups.
+            </p>
+          </div>
+
+          {/* Profile Menu on RIGHT */}
+          <ProfileMenu />
         </div>
 
         {/* SEARCH & FILTERS */}
@@ -74,6 +80,7 @@ const Dashboard = () => {
           className="bg-white/60 backdrop-blur-sm rounded-xl p-4 sm:p-6 mb-8 shadow-sm"
         >
           <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
+            
             {/* Search */}
             <div className="flex-1">
               <input
@@ -85,7 +92,7 @@ const Dashboard = () => {
               />
             </div>
 
-            {/* Location filter */}
+            {/* Location Filter */}
             <select
               value={locationFilter}
               onChange={(e) => setLocationFilter(e.target.value)}
@@ -110,43 +117,45 @@ const Dashboard = () => {
 
           {/* Chips */}
           <div className="mt-3 flex flex-wrap gap-2">
-            {["Workshops", "Meetups", "Conferences", "Online", "Free"].map((c) => (
-              <button
-                key={c}
-                type="button"
-                className="text-sm px-3 py-1.5 bg-white border border-gray-200 rounded-full text-gray-700 hover:bg-cherry/10 transition"
-              >
-                {c}
-              </button>
-            ))}
+            {["Workshops", "Meetups", "Conferences", "Online", "Free"].map(
+              (c) => (
+                <button
+                  key={c}
+                  type="button"
+                  className="text-sm px-3 py-1.5 bg-white border border-gray-200 rounded-full text-gray-700 hover:bg-cherry/10 transition"
+                >
+                  {c}
+                </button>
+              )
+            )}
           </div>
         </section>
 
-    <section aria-label="Events list">
-        {filtered.length === 0 ? (
-          <div className="py-12 text-center text-gray-500">No events found.</div>
-        ) : (
-          <div className="grid grid-cols-[repeat(auto-fit,minmax(250px,1fr))] gap-5">
-            {visibleEvents.map((ev, i) => (
-              <EventCard key={`${ev.title}-${i}`} event={ev} />
-            ))}
-          </div>
-        )}
+        {/* EVENTS */}
+        <section aria-label="Events list">
+          {filtered.length === 0 ? (
+            <div className="py-12 text-center text-gray-500">
+              No events found.
+            </div>
+          ) : (
+            <div className="grid grid-cols-[repeat(auto-fit,minmax(320px,1fr))] gap-6">
+              {visibleEvents.map((ev, i) => (
+                <EventCard key={`${ev.title}-${i}`} event={ev} />
+              ))}
+            </div>
+          )}
 
-        {visibleCount < filtered.length && (
-          <div className="mt-8 flex justify-center">
-            <button
-              onClick={() => setVisibleCount((v) => v + 8)}
-              className="px-5 py-3 bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition"
-            >
-              Load more
-            </button>
-          </div>
-        )}
-    </section>
-
-
-
+          {visibleCount < filtered.length && (
+            <div className="mt-8 flex justify-center">
+              <button
+                onClick={() => setVisibleCount((v) => v + 8)}
+                className="px-5 py-3 bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition"
+              >
+                Load more
+              </button>
+            </div>
+          )}
+        </section>
       </main>
 
       <Footer />

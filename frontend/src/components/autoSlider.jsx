@@ -7,26 +7,10 @@ import cover3 from "../assets/images/cover3.jpg";
 
 const HeroSlider = () => {
   const slides = [
-    {
-      img: cover,
-      title: "Welcome to Our Platform",
-      subtitle: "Discover amazing features tailored for your needs.",
-    },
-    {
-      img: cover1,
-      title: "Advanced Event Management",
-      subtitle: "Plan, organize, and track events effortlessly.",
-    },
-    {
-      img: cover2,
-      title: "Connect With People",
-      subtitle: "Join communities and grow your network.",
-    },
-    {
-      img: cover3,
-      title: "Your Journey Starts Here",
-      subtitle: "Simple. Fast. Powerful.",
-    },
+    { img: cover, title: "Welcome to Our Platform", subtitle: "Discover amazing features tailored for your needs." },
+    { img: cover1, title: "Advanced Event Management", subtitle: "Plan, organize, and track events effortlessly." },
+    { img: cover2, title: "Connect With People", subtitle: "Join communities and grow your network." },
+    { img: cover3, title: "Your Journey Starts Here", subtitle: "Simple. Fast. Powerful." },
   ];
 
   const [index, setIndex] = useState(0);
@@ -35,30 +19,27 @@ const HeroSlider = () => {
     const interval = setInterval(() => {
       setIndex((prev) => (prev + 1) % slides.length);
     }, 4000);
-
     return () => clearInterval(interval);
   }, []);
 
   return (
-    <div className="relative w-full overflow-hidden h-[70vh] md:h-[60vh] lg:h-[60vh]">
+    <div className="relative w-full overflow-hidden h-[60vh] md:h-[60vh] lg:h-[65vh]">
 
       {/* Slider */}
       <div
-        className="flex transition-transform duration-[1200ms] ease-out"
+        className="flex transition-transform duration-[1200ms] ease-out h-full"
         style={{ transform: `translateX(-${index * 100}%)` }}
       >
         {slides.map((slide, i) => (
-          <div key={i} className="w-full h-full relative object-cover object-center flex-shrink-0">
+          <div key={i} className="w-full h-full flex-shrink-0 relative">
             <img
               src={slide.img}
               alt="Hero Slide"
-              className="w-full h-full object-cover"
+              className="absolute inset-0 w-full h-full object-cover"
             />
 
-            {/* Overlay */}
-            <div className="absolute inset-0 bg-black/40"></div>
+            <div className="absolute inset-0 bg-black/40" />
 
-            {/* Hero Content */}
             <div className="absolute inset-0 flex flex-col items-start justify-center px-6 md:px-20 text-white">
               <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold drop-shadow-lg mb-4">
                 {slide.title}
@@ -75,11 +56,11 @@ const HeroSlider = () => {
       </div>
 
       {/* Dots */}
-      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-3">
+      <div className="absolute bottom-5 left-1/2 -translate-x-1/2 flex gap-3">
         {slides.map((_, i) => (
           <div
             key={i}
-            className={`w-4 h-4 rounded-full transition-all duration-300 
+            className={`w-3.5 h-3.5 rounded-full transition-all duration-300 
               ${index === i ? "bg-white scale-125 shadow-xl" : "bg-white/40"}`}
           ></div>
         ))}
