@@ -8,7 +8,7 @@ class Events(models.Model):
     date_time = models.DateTimeField()
     location = models.CharField(max_length=200)
     max_attendees = models.PositiveIntegerField()
-    price = models.IntegerField(default=0)
+    price = models.FloatField(default=0.00)
     event_cover = models.ImageField(upload_to="media/events/", blank=True, null=True)
 
     created_at = models.DateTimeField(default=timezone.now)

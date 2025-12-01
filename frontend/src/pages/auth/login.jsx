@@ -1,31 +1,42 @@
-// src/components/LoginPage.jsx
+
 import React, { useState } from "react";
-import logo from "../../assets/logo.png";
-import { Link, Navigate } from "react-router-dom";
-import api from "../../services/api";
 import { useNavigate } from "react-router-dom";
+import api from "../../services/api";
+import logo from "../../assets/logo.png"
+import { Link } from "react-router-dom";
+
 const Login = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
   const navigate = useNavigate();
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setMessage("");
 
     try {
-      const response = await api.post("login/", {
+      const response = await api.post("user/login/", {
         username,
         password,
       });
 
-      localStorage.setItem("access_token", response.data.tokens.access);
-      localStorage.setItem("refresh_token", response.data.tokens.refresh);
+      // Only access token comes in body now
+      const accessToken = response.data.access;
+
+      // Save access token (refresh is already in HttpOnly cookie!)
+      localStorage.setItem("access_token", accessToken);
+
+      // Optional: save user data if you need it
+      if (response.data.user) {
+        localStorage.setItem("user", JSON.stringify(response.data.user));
+      }
 
       setMessage("Login successful!");
-      navigate("/event")
+      navigate("/");
     } catch (error) {
-      console.log(error.response?.data);
-      setMessage("Login failed. Check username or password.");
+      console.error("Login error:", error.response?.data);
+      setMessage("Invalid username or password.");
     }
   };
 
@@ -78,13 +89,13 @@ const Login = () => {
           </Link>
         </p>
         <p className="text-sm text-gray-400 text-center mt-2">
-          <Link to="/forgate" className="text-blue-500 hover:underline">
+          <Link to="/forgot" className="text-blue-500 hover:underline">
             Forgot password?
           </Link>
         </p>
       </div>
     </div>
   );
-};
+}; 
 
 export default Login;

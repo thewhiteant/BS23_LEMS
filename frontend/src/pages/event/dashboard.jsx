@@ -2,10 +2,10 @@ import { useMemo, useState } from "react";
 
 import HeroSlider from "../../components/autoSlider";
 import EventCard from "../../components/eventCard";
-import Footer from "../../components/Footer";
-import ProfileMenu from "../../components/ProfileMenu";
-
+import Footer from "../../components/footer";
+import ProfileMenu from "../../components/profileMenu";
 import cover from "../../assets/images/cover.jpg";
+
 
 const sampleEvent = {
   image: cover,

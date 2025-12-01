@@ -25,24 +25,30 @@ class RegisterView(APIView):
     def get(self,request):
         return Response({"message": "Method Not Allowed"},status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
-
+# views.py
 class LoginView(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
-        
-        serializer = LoginSerializer(data=request.data, context={'request': request})
+        serializer = LoginSerializer(data=request.data, context={"request": request})
         serializer.is_valid(raise_exception=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-    
 
-      
-    def get(self,request):
-        return Response({"message": "Method Not Allowed"},status=status.HTTP_405_METHOD_NOT_ALLOWED)
+        refresh_token = serializer.context.get("refresh_token")
 
+        response = Response(serializer.data, status=status.HTTP_200_OK)
 
+        if refresh_token:
+            response.set_cookie(
+                key="refresh_token",
+                value=refresh_token,
+                httponly=True,
+                secure=request.is_secure(),   
+                samesite="Lax",
+                max_age=7 * 24 * 60 * 60,     
+            )
 
-
+        return response
+  
 
 
 

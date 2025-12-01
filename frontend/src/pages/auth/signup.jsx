@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import logo from "../../assets/logo.png";
 import { Link } from "react-router-dom";
 import api from "../../services/api";
+import { useNavigate } from "react-router-dom";
 
 const Signup = () => {
   const [username, setUsername] = useState("");
@@ -11,20 +12,21 @@ const Signup = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [phone, setPhone] = useState("");
   const [message, setMessage] = useState(""); // to show success or error messages
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (password !== confirmPassword) {
-      setMessage("Passwords do not match!");
-      return;
-    }
 
+    // Basic validations
     if (!username) return setMessage("Username is required");
     if (!email) return setMessage("Email is required");
     if (!password) return setMessage("Password is required");
+    if (password !== confirmPassword) {
+      return setMessage("Passwords do not match!");
+    }
 
     try {
-      const response = await api.post("register/", {
+      const response = await api.post("user/register/", {
         username,
         email,
         password,
@@ -33,14 +35,34 @@ const Signup = () => {
       });
 
       setMessage("Signup successful!");
+
+      // Clear fields
       setUsername("");
       setEmail("");
       setPassword("");
       setConfirmPassword("");
       setPhone("");
-      window.location.href = "/login";
+
+      // Redirect to login after short delay (optional for UX)
+      setTimeout(() => {
+        navigate("/login");
+      }, 1000);
     } catch (err) {
-      setMessage("Signup failed. Check your info.");
+      // Detailed error message if available
+      if (err.response && err.response.data) {
+        const errors = err.response.data;
+        let errorMsg = "";
+        for (const key in errors) {
+          if (Array.isArray(errors[key])) {
+            errorMsg += `${errors[key].join(" ")} `;
+          } else {
+            errorMsg += `${errors[key]} `;
+          }
+        }
+        setMessage(errorMsg.trim());
+      } else {
+        setMessage("Signup failed. Check your info.");
+      }
     }
   };
 

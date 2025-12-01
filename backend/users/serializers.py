@@ -25,56 +25,31 @@ class RegisterSerializer(serializers.ModelSerializer):
         return user
 
 class LoginSerializer(serializers.Serializer):
-
     username = serializers.CharField()
     password = serializers.CharField(write_only=True)
 
     def validate(self, attrs):
-        username_or_email = attrs['username']
-        password = attrs['password']
+        username = attrs["username"]
+        password = attrs["password"]
 
-        user = Users.objects.filter(email=username_or_email).first()
-        
-        #email check
-        if not user:
-            user = Users.objects.filter(username=username_or_email).first()
+        user = Users.objects.filter(username=username).first()
+        if not user or not user.check_password(password):
+            raise serializers.ValidationError("Invalid username or password.")
 
-        # usename check
-        if not user:
-            raise serializers.ValidationError("Invalid username/email or password.")
-        
-        #password check
-        if not user.check_password(password):
-            raise serializers.ValidationError("Invalid username/email or password.")
-
-
-        attrs['user'] = user
+        attrs["user"] = user
         return attrs
 
-
     def to_representation(self, instance):
-        user = instance['user']
+        user = instance["user"]
+        request = self.context.get("request")
         refresh = RefreshToken.for_user(user)
-
-        # Prepare user data using UserResponseSerializer
-        user_data = UserResponseSerializer(
-            user,
-            context=self.context  # required for profile image absolute URL
-        ).data
-
-        # Token data
-        token_data = {
-            "refresh": str(refresh),
-            "access": str(refresh.access_token)
-        }
-
+        self.context["refresh_token"] = str(refresh)
         return {
-            "user": user_data,
-            "tokens": token_data
+            "user": UserResponseSerializer(user, context=self.context).data,
+            "access": str(refresh.access_token),
         }
 
 
-#user data representaion serializer
 class UserResponseSerializer(serializers.ModelSerializer):
     profile_image = serializers.SerializerMethodField()
 

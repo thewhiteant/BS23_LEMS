@@ -1,6 +1,6 @@
 import { useState } from "react";
-import Footer from "../../components/Footer";
-import ProfileMenu from "../../components/ProfileMenu"; // <-- Your component
+import Footer from "../../components/footer";
+import ProfileMenu from "../../components/profileMenu"; // <-- Your component
 
 // Import images
 import cover from "../../assets/images/cover.jpg";
