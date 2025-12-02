@@ -3,7 +3,9 @@ from .models import Users
 from rest_framework_simplejwt.tokens import RefreshToken
 
 
-
+# ------------------------
+# Register Serializer
+# ------------------------
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, min_length=8)
     password_confirm = serializers.CharField(write_only=True)
@@ -24,32 +26,10 @@ class RegisterSerializer(serializers.ModelSerializer):
         user.save()
         return user
 
-class LoginSerializer(serializers.Serializer):
-    username = serializers.CharField()
-    password = serializers.CharField(write_only=True)
 
-    def validate(self, attrs):
-        username = attrs["username"]
-        password = attrs["password"]
-
-        user = Users.objects.filter(username=username).first()
-        if not user or not user.check_password(password):
-            raise serializers.ValidationError("Invalid username or password.")
-
-        attrs["user"] = user
-        return attrs
-
-    def to_representation(self, instance):
-        user = instance["user"]
-        request = self.context.get("request")
-        refresh = RefreshToken.for_user(user)
-        self.context["refresh_token"] = str(refresh)
-        return {
-            "user": UserResponseSerializer(user, context=self.context).data,
-            "access": str(refresh.access_token),
-        }
-
-
+# ------------------------
+# User Response Serializer
+# ------------------------
 class UserResponseSerializer(serializers.ModelSerializer):
     profile_image = serializers.SerializerMethodField()
 
@@ -74,23 +54,40 @@ class UserResponseSerializer(serializers.ModelSerializer):
         return None
 
 
+# ------------------------
+# Login Serializer
+# ------------------------
+class LoginSerializer(serializers.Serializer):
+    username = serializers.CharField()
+    password = serializers.CharField(write_only=True)
+
+    def validate(self, attrs):
+        username = attrs["username"]
+        password = attrs["password"]
+
+        user = Users.objects.filter(username=username).first()
+        if not user or not user.check_password(password):
+            raise serializers.ValidationError("Invalid username or password.")
+
+        attrs["user"] = user
+        return attrs
+
+    def to_representation(self, instance):
+        user = instance["user"]
+        refresh = RefreshToken.for_user(user)  # Generate refresh token
+        access = refresh.access_token         # Generate access token
+
+        # Return user + tokens in JSON
+        return {
+            "user": UserResponseSerializer(user, context=self.context).data,
+            "access": str(access),
+            "refresh": str(refresh),
+        }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+# ------------------------
+# Profile Serializer
+# ------------------------
 class ProfileSerializer(serializers.ModelSerializer):
     profile_image = serializers.SerializerMethodField()
 
@@ -98,18 +95,21 @@ class ProfileSerializer(serializers.ModelSerializer):
         model = Users
         fields = [
             'id', 
-            'username', 'email', 'phone', 'profile_image', 'is_staff', 'date_joined', 'attend_number_of_event']
+            'username', 'email', 'phone', 'profile_image', 'is_staff', 'date_joined', 'attend_number_of_event'
+        ]
         read_only_fields = ['id', 'is_staff', 'date_joined', 'attend_number_of_event']
 
     def get_profile_image(self, obj):
+        request = self.context.get('request')
         if obj.profile_image:
-            request = self.context.get('request')
             url = obj.profile_image.url
             return request.build_absolute_uri(url) if request else url
         return None
 
 
-
+# ------------------------
+# Profile Update Serializer
+# ------------------------
 class ProfileUpdateSerializer(serializers.ModelSerializer):
     profile_image = serializers.ImageField(required=False, allow_null=True)
 
@@ -126,5 +126,3 @@ class ProfileUpdateSerializer(serializers.ModelSerializer):
         if value != self.instance.username and Users.objects.filter(username=value).exclude(pk=self.instance.pk).exists():
             raise serializers.ValidationError("This username is already taken.")
         return value
-
-

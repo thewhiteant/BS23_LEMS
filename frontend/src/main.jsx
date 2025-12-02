@@ -9,16 +9,14 @@ import ResetPassword from "./pages/auth/sesetPassword";
 import Dashbord from "./pages/event/dashboard";
 import EventPage from "./pages/event/eventPage";
 import ProfilePage from "./pages/users/profile";
-import UserDashboard from "./pages/users/dashbord";
+import UserDashboard from "./pages/users/dashboard";
 import AdminDashboard from "./pages/admin/adminDashbord";
 import UserEventRequestPage from "./pages/users/eventRequest";
 import AdminCreateEvent from "./pages/admin/adminEventCreate";
 import AdminEventEdit from "./pages/admin/adminEventEdit";
 import AdminEventInvite from "./pages/admin/adminEventInvite";
 import ProtectedRoute from "./components/protectedRoute";
-
-
-
+import Logout from "./components/logout";
 
 const router = createBrowserRouter([
   // Public routes
@@ -26,13 +24,12 @@ const router = createBrowserRouter([
   { path: "/signup", element: <Signup /> },
   { path: "/forgot", element: <ForgotPassword /> },
 
-
   // Event routes
   {
     path: "/",
     element: (
       <ProtectedRoute>
-        <Dashbord/>
+        <Dashbord />
       </ProtectedRoute>
     ),
   },
@@ -47,7 +44,7 @@ const router = createBrowserRouter([
 
   // User routes
   {
-    path: "/user",
+    path: "/user/profile",
     element: (
       <ProtectedRoute>
         <ProfilePage />
@@ -105,19 +102,28 @@ const router = createBrowserRouter([
     ),
   },
 
-  
-  { path: "/reset", element:(
-     <ProtectedRoute>
-         <ResetPassword />
-    </ProtectedRoute>
-  ) },
+  {
+    path: "/reset",
+    element: (
+      <ProtectedRoute>
+        <ResetPassword />
+      </ProtectedRoute>
+    ),
+  },
 
-  
+  {
+    path: "/logout",
+    element: (
+      <ProtectedRoute>
+        <Logout />
+      </ProtectedRoute>
+    ),
+  },
+
   // {
   //   path: "*",
   //   element: <div>404 - Page Not Found</div>,
   // },
-
 ]);
 
 ReactDOM.createRoot(document.getElementById("root")).render(

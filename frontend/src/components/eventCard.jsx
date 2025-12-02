@@ -1,7 +1,7 @@
 import React from "react";
 
 const EventCard = ({ event }) => {
-  const { image, title, description, dateTime, location } = event;
+  const { event_cover, title, desc, date_time, location } = event;
 
   return (
     <div
@@ -18,7 +18,7 @@ const EventCard = ({ event }) => {
     >
       {/* Event Image */}
       <img
-        src={image}
+        src={event_cover}
         alt={title}
         className="w-full h-48 object-cover rounded-t-xl"
       />
@@ -30,13 +30,13 @@ const EventCard = ({ event }) => {
 
         {/* Description */}
         <p className="text-gray-600 text-sm md:text-base line-clamp-3">
-          {description}
+          {desc}
         </p>
 
         {/* Time & Location */}
         <div className="mt-2 flex flex-col gap-1 text-gray-500 text-sm">
           <span>
-            <strong>Time:</strong> {dateTime}
+            <strong>Time:</strong> {date_time}
           </span>
           <span>
             <strong>Location:</strong> {location}

@@ -10,15 +10,16 @@ from .models import Events
 # Create your views here.
 
 
-#test
 
-class viewAllData(APIView):
-    permission_classes = [AllowAny]
-    def get(self,request):
-            events = Events.objects.all()
-            serializer = EventSerializer(events, many=True)
-            return Response(serializer.data,status=status.HTTP_200_OK)
-#test
+
+class AllEventsView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        events = Events.objects.all().order_by('-date_time')
+        serializer = EventSerializer(events, many=True, context={'request': request})
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
 
 
 class AddEventView(APIView):

@@ -1,7 +1,5 @@
-// src/services/api.js
 import axios from "axios";
 
-// Main API instance
 const api = axios.create({
   baseURL: "http://localhost:8000/",
   timeout: 10000,
@@ -9,53 +7,65 @@ const api = axios.create({
     "Content-Type": "application/json",
     Accept: "application/json",
   },
-  withCredentials: true,
 });
 
-// Separate axios instance for refresh token request
-const refreshApi = axios.create({
-  baseURL: "http://localhost:8000/",
-  withCredentials: true,
-});
+// Endpoints that don’t require authentication
+const noAuthEndpoints = ["user/register/", "user/login/"];
 
-// ---------------------
-// REQUEST INTERCEPTOR
-// ---------------------
+// Attach access token to requests
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem("access_token");
-    if (token) {
+    const token = localStorage.getItem("access");
+    const isPublic = noAuthEndpoints.some((url) => config.url.includes(url));
+
+    if (!isPublic && token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+
     return config;
   },
   (error) => Promise.reject(error)
 );
 
-// ---------------------
-// RESPONSE INTERCEPTOR
-// ---------------------
+// Handle 401 (token expired)
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
 
-
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
 
-      try {
-        const refreshResponse = await refreshApi.post("token/refresh/");
-        const newAccessToken = refreshResponse.data.access;
-        localStorage.setItem("access_token", newAccessToken);
-        originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+      const refreshToken = localStorage.getItem("refresh");
 
-        return api(originalRequest);
-      } catch (refreshError) {
-
-        localStorage.removeItem("access_token");
+      if (!refreshToken) {
+        localStorage.removeItem("access");
+        localStorage.removeItem("refresh");
         localStorage.removeItem("user");
         window.location.href = "/login";
+        return Promise.reject(error);
+      }
+
+      try {
+        // Call your refresh endpoint
+        const refreshResponse = await axios.post(
+          "http://localhost:8000/user/token/refresh/",
+          {
+            refresh: refreshToken,
+          }
+        );
+
+        const newAccessToken = refreshResponse.data.access;
+        localStorage.setItem("access", newAccessToken);
+
+        originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+        return api(originalRequest);
+      } catch (err) {
+        localStorage.removeItem("access");
+        localStorage.removeItem("refresh");
+        localStorage.removeItem("user");
+        window.location.href = "/login";
+        return Promise.reject(err);
       }
     }
 

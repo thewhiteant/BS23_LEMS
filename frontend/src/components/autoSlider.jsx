@@ -5,13 +5,43 @@ import cover1 from "../assets/images/cover1.jpg";
 import cover2 from "../assets/images/cover2.jpg";
 import cover3 from "../assets/images/cover3.jpg";
 
-const HeroSlider = () => {
-  const slides = [
-    { img: cover, title: "Welcome to Our Platform", subtitle: "Discover amazing features tailored for your needs." },
-    { img: cover1, title: "Advanced Event Management", subtitle: "Plan, organize, and track events effortlessly." },
-    { img: cover2, title: "Connect With People", subtitle: "Join communities and grow your network." },
-    { img: cover3, title: "Your Journey Starts Here", subtitle: "Simple. Fast. Powerful." },
+const HeroSlider = ({ events = [] }) => {
+  // Predefined fallback slides
+  const defaultSlides = [
+    {
+      img: cover,
+      title: "Welcome to Our Platform",
+      subtitle: "Discover amazing features tailored for your needs.",
+    },
+    {
+      img: cover1,
+      title: "Advanced Event Management",
+      subtitle: "Plan, organize, and track events effortlessly.",
+    },
+    {
+      img: cover2,
+      title: "Connect With People",
+      subtitle: "Join communities and grow your network.",
+    },
+    {
+      img: cover3,
+      title: "Your Journey Starts Here",
+      subtitle: "Simple. Fast. Powerful.",
+    },
   ];
+
+  // If events exist, map them to slides
+  const slides =
+    events.length > 0
+      ? events.map((event) => ({
+          img: event.event_cover, // full URL from backend
+          title: event.title,
+          subtitle:
+            event.desc.length > 100
+              ? event.desc.slice(0, 100) + "..."
+              : event.desc,
+        }))
+      : defaultSlides;
 
   const [index, setIndex] = useState(0);
 
@@ -20,11 +50,10 @@ const HeroSlider = () => {
       setIndex((prev) => (prev + 1) % slides.length);
     }, 4000);
     return () => clearInterval(interval);
-  }, []);
+  }, [slides.length]);
 
   return (
     <div className="relative w-full overflow-hidden h-[60vh] md:h-[60vh] lg:h-[65vh]">
-
       {/* Slider */}
       <div
         className="flex transition-transform duration-[1200ms] ease-out h-full"
@@ -34,7 +63,7 @@ const HeroSlider = () => {
           <div key={i} className="w-full h-full flex-shrink-0 relative">
             <img
               src={slide.img}
-              alt="Hero Slide"
+              alt={slide.title}
               className="absolute inset-0 w-full h-full object-cover"
             />
 
@@ -48,7 +77,7 @@ const HeroSlider = () => {
                 {slide.subtitle}
               </p>
               <button className="px-6 py-3 bg-white/20 backdrop-blur-md rounded-lg text-white border border-white/40 hover:bg-white/30 transition">
-                Get Started →
+                Attend →
               </button>
             </div>
           </div>

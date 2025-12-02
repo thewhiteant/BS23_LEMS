@@ -1,8 +1,7 @@
-
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../../services/api";
-import logo from "../../assets/logo.png"
+import logo from "../../assets/logo.png";
 import { Link } from "react-router-dom";
 
 const Login = () => {
@@ -21,22 +20,26 @@ const Login = () => {
         password,
       });
 
-      // Only access token comes in body now
-      const accessToken = response.data.access;
+      const { access, refresh, user } = response.data;
 
-      // Save access token (refresh is already in HttpOnly cookie!)
-      localStorage.setItem("access_token", accessToken);
+      // Save both tokens in localStorage
+      localStorage.setItem("access", access);
+      localStorage.setItem("refresh", refresh);
 
-      // Optional: save user data if you need it
-      if (response.data.user) {
-        localStorage.setItem("user", JSON.stringify(response.data.user));
+      // Save user data
+      if (user) {
+        localStorage.setItem("user", JSON.stringify(user));
       }
 
       setMessage("Login successful!");
       navigate("/");
     } catch (error) {
       console.error("Login error:", error.response?.data);
-      setMessage("Invalid username or password.");
+      setMessage(
+        error.response?.data?.detail ||
+          error.response?.data?.message ||
+          "Invalid username or password."
+      );
     }
   };
 
@@ -49,9 +52,7 @@ const Login = () => {
         <h2 className="text-2xl font-bold text-center mb-6 text-white">
           Login to Your Account
         </h2>
-        {message && (
-          <p className="text-center mb-4 text-red-400">{message}</p>
-        )}
+        {message && <p className="text-center mb-4 text-red-400">{message}</p>}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-gray-300 mb-1">Username</label>
@@ -96,6 +97,6 @@ const Login = () => {
       </div>
     </div>
   );
-}; 
+};
 
 export default Login;

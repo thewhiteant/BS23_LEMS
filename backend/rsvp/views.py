@@ -6,7 +6,7 @@ from django.shortcuts import get_object_or_404
 from .models import RSVP, InviteToken
 from events.models import Events
 from .serializer import RSVPSerializer
-
+from events.serializer import EventSerializer
 
 # ----------------- 1. USER REGISTER VIEW -----------------
 class RegisterUserView(APIView):
@@ -116,13 +116,27 @@ class LinkGenaratorView(APIView):
         return Response({"link": invite_url}, status=status.HTTP_201_CREATED)
 
 
+class UserDashboardView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        user = request.user  
+
+        reservations = RSVP.objects.filter(user=user).select_related('event')
+        events = Events.objects.filter(rsvps__in=reservations).distinct()
+        serializer = EventSerializer(events, many=True, context={'request': request})
+
+        return Response({
+            "events": serializer.data
+        }, status=status.HTTP_200_OK)
+
 
 
 #test
 
-class Allrsvp(APIView):
-    permission_classes = [AllowAny]
-    def get(self,request):
-        alldata = RSVP.objects.all()
-        serializer = RSVPSerializer(alldata,many=True)
-        return Response(serializer.data,status=status.HTTP_200_OK)
+# class Allrsvp(APIView):
+#     permission_classes = [AllowAny]
+#     def get(self,request):
+#         alldata = RSVP.objects.all()
+#         serializer = RSVPSerializer(alldata,many=True)
+#         return Response(serializer.data,status=status.HTTP_200_OK)

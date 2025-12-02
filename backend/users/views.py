@@ -13,19 +13,25 @@ from .serializers import (
 )
 
 
-#Understand
+# ------------------------
+# Register
+# ------------------------
 class RegisterView(APIView):
     permission_classes = [AllowAny]
+
     def post(self, request):
         serializer = RegisterSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        user = serializer.save()
-        return Response({"message": "User registered successfully",}, status=status.HTTP_201_CREATED)
-    
-    def get(self,request):
-        return Response({"message": "Method Not Allowed"},status=status.HTTP_405_METHOD_NOT_ALLOWED)
+        serializer.save()
+        return Response({"message": "User registered successfully"}, status=status.HTTP_201_CREATED)
 
-# views.py
+    def get(self, request):
+        return Response({"message": "Method Not Allowed"}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
+
+# ------------------------
+# Login (return tokens in JSON)
+# ------------------------
 class LoginView(APIView):
     permission_classes = [AllowAny]
 
@@ -33,51 +39,22 @@ class LoginView(APIView):
         serializer = LoginSerializer(data=request.data, context={"request": request})
         serializer.is_valid(raise_exception=True)
 
-        refresh_token = serializer.context.get("refresh_token")
+        user = serializer.validated_data["user"]
 
-        response = Response(serializer.data, status=status.HTTP_200_OK)
+        # Generate tokens
+        refresh = RefreshToken.for_user(user)
+        access = refresh.access_token
 
-        if refresh_token:
-            response.set_cookie(
-                key="refresh_token",
-                value=refresh_token,
-                httponly=True,
-                secure=request.is_secure(),   
-                samesite="Lax",
-                max_age=7 * 24 * 60 * 60,     
-            )
-
-        return response
-  
+        return Response({
+            "user": serializer.to_representation({"user": user})["user"],  # user data
+            "access": str(access),
+            "refresh": str(refresh),
+        }, status=status.HTTP_200_OK)
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+# ------------------------
+# Profile
+# ------------------------
 class ProfileView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -92,6 +69,9 @@ class ProfileView(APIView):
         return Response(ProfileSerializer(request.user, context={'request': request}).data)
 
 
+# ------------------------
+# Logout (blacklist refresh token)
+# ------------------------
 class LogoutView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -105,6 +85,3 @@ class LogoutView(APIView):
             return Response({"message": "Logged out successfully."}, status=status.HTTP_205_RESET_CONTENT)
         except Exception:
             return Response({"error": "Invalid or expired token."}, status=status.HTTP_400_BAD_REQUEST)
-
-
-

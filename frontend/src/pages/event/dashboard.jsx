@@ -1,98 +1,88 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import api from "../../services/api";
 
 import HeroSlider from "../../components/autoSlider";
 import EventCard from "../../components/eventCard";
 import Footer from "../../components/footer";
 import ProfileMenu from "../../components/profileMenu";
-import cover from "../../assets/images/cover.jpg";
-
-
-const sampleEvent = {
-  image: cover,
-  title: "React Conference 2025",
-  description:
-    "Join the biggest React conference with top speakers, workshops, and networking opportunities.",
-  dateTime: "Dec 10, 2025 - 10:00 AM",
-  location: "Dhaka, Bangladesh",
-};
 
 const Dashboard = () => {
-  const initialEvents = useMemo(
-    () =>
-      Array.from({ length: 12 }).map((_, i) => ({
-        ...sampleEvent,
-        title: `${sampleEvent.title} — Track ${Math.floor(i / 3) + 1}`,
-        description:
-          sampleEvent.description +
-          ` This is sample card #${i + 1}. Learn, network and grow.`,
-        dateTime: `Dec ${10 + (i % 5)}, 2025 - ${9 + (i % 6)}:00 AM`,
-        location: i % 2 === 0 ? "Dhaka, Bangladesh" : "Remote / Online",
-      })),
-    []
-  );
+  const [events, setEvents] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const [query, setQuery] = useState("");
   const [locationFilter, setLocationFilter] = useState("all");
   const [visibleCount, setVisibleCount] = useState(8);
 
-  const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    return initialEvents.filter((ev) => {
-      if (locationFilter === "dhaka" && !/dhaka/i.test(ev.location))
-        return false;
-      if (locationFilter === "online" && /dhaka/i.test(ev.location))
-        return false;
-      if (!q) return true;
-      return (
-        ev.title.toLowerCase().includes(q) ||
-        ev.description.toLowerCase().includes(q) ||
-        ev.location.toLowerCase().includes(q)
-      );
-    });
-  }, [initialEvents, query, locationFilter]);
+  // Fetch events from backend
+  useEffect(() => {
+    const fetchEvents = async () => {
+      try {
+        const res = await api.get("event/all/");
+        setEvents(res.data);
+      } catch (err) {
+        console.error("Error loading events:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchEvents();
+  }, []);
 
-  const visibleEvents = filtered.slice(0, visibleCount);
+  // Filter events based on search query and location
+  const filteredEvents = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return events.filter((ev) => {
+      const title = ev.title?.toLowerCase() || "";
+      const desc = ev.desc?.toLowerCase() || "";
+      const location = ev.location?.toLowerCase() || "";
+
+      // Location filter
+      if (locationFilter === "dhaka" && !location.includes("dhaka"))
+        return false;
+      if (locationFilter === "online" && location.includes("dhaka"))
+        return false;
+
+      // Search filter
+      if (!q) return true;
+      return title.includes(q) || desc.includes(q) || location.includes(q);
+    });
+  }, [events, query, locationFilter]);
+
+  const visibleEvents = filteredEvents.slice(0, visibleCount);
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-white to-gray-50">
-      <HeroSlider />
+      {/* Hero Slider: Pass events if available */}
+      <HeroSlider events={events.length > 0 ? events : undefined} />
 
       <main className="m-10 p-[10px]">
-
-        {/* TITLE + PROFILE BUTTON */}
-        <div className="mb-6 flex items-center justify-between">
+        {/* Header */}
+        <div className="mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
             <h1 className="text-cherry font-extrabold text-3xl sm:text-4xl md:text-5xl leading-tight">
               All Events
             </h1>
             <p className="text-sm text-gray-500 mt-1">
-              Browse upcoming events, workshops and meetups.
+              Browse upcoming events, workshops, and meetups.
             </p>
           </div>
-
-          {/* Profile Menu on RIGHT */}
           <ProfileMenu />
         </div>
 
-        {/* SEARCH & FILTERS */}
+        {/* Search & Filters */}
         <section
           aria-label="Search and filters"
           className="bg-white/60 backdrop-blur-sm rounded-xl p-4 sm:p-6 mb-8 shadow-sm"
         >
           <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
-            
-            {/* Search */}
-            <div className="flex-1">
-              <input
-                id="search"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search by title, description, or location..."
-                className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-cherry focus:border-transparent"
-              />
-            </div>
+            <input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search by title, description, or location..."
+              className="flex-1 px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-cherry focus:border-transparent"
+            />
 
-            {/* Location Filter */}
             <select
               value={locationFilter}
               onChange={(e) => setLocationFilter(e.target.value)}
@@ -103,7 +93,6 @@ const Dashboard = () => {
               <option value="online">Online</option>
             </select>
 
-            {/* Reset */}
             <button
               onClick={() => {
                 setQuery("");
@@ -114,38 +103,27 @@ const Dashboard = () => {
               Clear
             </button>
           </div>
-
-          {/* Chips */}
-          <div className="mt-3 flex flex-wrap gap-2">
-            {["Workshops", "Meetups", "Conferences", "Online", "Free"].map(
-              (c) => (
-                <button
-                  key={c}
-                  type="button"
-                  className="text-sm px-3 py-1.5 bg-white border border-gray-200 rounded-full text-gray-700 hover:bg-cherry/10 transition"
-                >
-                  {c}
-                </button>
-              )
-            )}
-          </div>
         </section>
 
-        {/* EVENTS */}
+        {/* Events List */}
         <section aria-label="Events list">
-          {filtered.length === 0 ? (
+          {loading ? (
+            <div className="py-12 text-center text-gray-500">
+              Loading events...
+            </div>
+          ) : filteredEvents.length === 0 ? (
             <div className="py-12 text-center text-gray-500">
               No events found.
             </div>
           ) : (
             <div className="grid grid-cols-[repeat(auto-fit,minmax(320px,1fr))] gap-6">
-              {visibleEvents.map((ev, i) => (
-                <EventCard key={`${ev.title}-${i}`} event={ev} />
+              {visibleEvents.map((ev) => (
+                <EventCard key={ev.id} event={ev} />
               ))}
             </div>
           )}
 
-          {visibleCount < filtered.length && (
+          {visibleCount < filteredEvents.length && (
             <div className="mt-8 flex justify-center">
               <button
                 onClick={() => setVisibleCount((v) => v + 8)}

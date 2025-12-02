@@ -1,9 +1,7 @@
-// src/components/Signup.jsx
 import React, { useState } from "react";
 import logo from "../../assets/logo.png";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import api from "../../services/api";
-import { useNavigate } from "react-router-dom";
 
 const Signup = () => {
   const [username, setUsername] = useState("");
@@ -11,22 +9,19 @@ const Signup = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [phone, setPhone] = useState("");
-  const [message, setMessage] = useState(""); // to show success or error messages
+  const [message, setMessage] = useState("");
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Basic validations
-    if (!username) return setMessage("Username is required");
-    if (!email) return setMessage("Email is required");
-    if (!password) return setMessage("Password is required");
     if (password !== confirmPassword) {
-      return setMessage("Passwords do not match!");
+      setMessage("Passwords do not match");
+      return;
     }
 
     try {
-      const response = await api.post("user/register/", {
+      await api.post("user/register/", {
         username,
         email,
         password,
@@ -43,99 +38,90 @@ const Signup = () => {
       setConfirmPassword("");
       setPhone("");
 
-      // Redirect to login after short delay (optional for UX)
-      setTimeout(() => {
-        navigate("/login");
-      }, 1000);
+      // Redirect
+      setTimeout(() => navigate("/login"), 1000);
     } catch (err) {
-      // Detailed error message if available
-      if (err.response && err.response.data) {
-        const errors = err.response.data;
-        let errorMsg = "";
-        for (const key in errors) {
-          if (Array.isArray(errors[key])) {
-            errorMsg += `${errors[key].join(" ")} `;
-          } else {
-            errorMsg += `${errors[key]} `;
-          }
-        }
-        setMessage(errorMsg.trim());
-      } else {
-        setMessage("Signup failed. Check your info.");
-      }
+      console.error(err); // Just log error, no formatting
+      setMessage("Something went wrong"); // Simple message
     }
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-900">
       <div className="bg-gray-800 p-8 rounded-2xl shadow-lg w-full max-w-md text-gray-200">
+
         <div className="flex justify-center mb-6">
           <img src={logo} alt="Logo" className="h-25 w-35 object-contain" />
         </div>
+
         <h2 className="text-2xl font-bold text-center mb-6 text-white">
           Create Your Account
         </h2>
 
-        {message && (
-          <p className="text-center mb-4 text-red-400">{message}</p>
-        )}
+        {message && <p className="text-center mb-4 text-red-400">{message}</p>}
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          
           <div>
             <label className="block text-gray-300 mb-1">Username</label>
             <input
               type="text"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              className="w-full bg-gray-700 border border-gray-600 rounded-md p-2 text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Enter your username"
+              className="w-full bg-gray-700 border border-gray-600 rounded-md p-2 text-gray-100"
+              placeholder="Enter username"
               required
             />
           </div>
+
           <div>
             <label className="block text-gray-300 mb-1">Email</label>
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full bg-gray-700 border border-gray-600 rounded-md p-2 text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Enter your email"
+              className="w-full bg-gray-700 border border-gray-600 rounded-md p-2 text-gray-100"
+              placeholder="Enter email"
               required
             />
           </div>
+
           <div>
             <label className="block text-gray-300 mb-1">Password</label>
             <input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full bg-gray-700 border border-gray-600 rounded-md p-2 text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Enter your password"
+              className="w-full bg-gray-700 border border-gray-600 rounded-md p-2 text-gray-100"
+              placeholder="Enter password"
               required
             />
           </div>
+
           <div>
             <label className="block text-gray-300 mb-1">Confirm Password</label>
             <input
               type="password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              className="w-full bg-gray-700 border border-gray-600 rounded-md p-2 text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Confirm your password"
+              className="w-full bg-gray-700 border border-gray-600 rounded-md p-2 text-gray-100"
+              placeholder="Confirm password"
               required
             />
           </div>
+
           <div>
             <label className="block text-gray-300 mb-1">Phone</label>
             <input
               type="tel"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
-              className="w-full bg-gray-700 border border-gray-600 rounded-md p-2 text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Enter your phone number"
+              className="w-full bg-gray-700 border border-gray-600 rounded-md p-2 text-gray-100"
+              placeholder="Enter phone number"
               required
             />
           </div>
+
           <button
             type="submit"
             className="w-full bg-blue-600 text-white p-2 rounded-md hover:bg-blue-700 transition"
@@ -150,6 +136,7 @@ const Signup = () => {
             Login
           </Link>
         </p>
+
       </div>
     </div>
   );
