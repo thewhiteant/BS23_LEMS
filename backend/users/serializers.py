@@ -89,7 +89,7 @@ class LoginSerializer(serializers.Serializer):
 # Profile Serializer
 # ------------------------
 class ProfileSerializer(serializers.ModelSerializer):
-    profile_image = serializers.SerializerMethodField()
+
 
     class Meta:
         model = Users
@@ -99,23 +99,22 @@ class ProfileSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ['id', 'is_staff', 'date_joined', 'attend_number_of_event']
 
-    def get_profile_image(self, obj):
-        request = self.context.get('request')
-        if obj.profile_image:
-            url = obj.profile_image.url
-            return request.build_absolute_uri(url) if request else url
-        return None
-
 
 # ------------------------
 # Profile Update Serializer
 # ------------------------
 class ProfileUpdateSerializer(serializers.ModelSerializer):
     profile_image = serializers.ImageField(required=False, allow_null=True)
+    current_password = serializers.CharField(write_only=True, required=True, min_length=6)
 
     class Meta:
         model = Users
-        fields = ['username', 'email', 'phone', 'profile_image']
+        fields = ['username', 'email', 'phone', 'profile_image', 'current_password']
+
+    def validate_current_password(self, value):
+        if not self.instance.check_password(value):
+            raise serializers.ValidationError("Incorrect password.")
+        return value
 
     def validate_email(self, value):
         if value != self.instance.email and Users.objects.filter(email=value).exclude(pk=self.instance.pk).exists():
@@ -126,3 +125,8 @@ class ProfileUpdateSerializer(serializers.ModelSerializer):
         if value != self.instance.username and Users.objects.filter(username=value).exclude(pk=self.instance.pk).exists():
             raise serializers.ValidationError("This username is already taken.")
         return value
+
+    def update(self, instance, validated_data):
+        validated_data.pop('current_password', None)  
+        return super().update(instance, validated_data)
+

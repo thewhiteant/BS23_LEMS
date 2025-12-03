@@ -13,7 +13,7 @@ const UserDashboard = () => {
       try {
         const res = await api.get("user/dashboard/");
 
-        console.log("Dashboard Response:", res); // debug
+        console.log(res); // debug
 
         setEvents(res.data.events); // ✔ correct
       } catch (err) {

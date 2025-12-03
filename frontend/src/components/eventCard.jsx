@@ -1,8 +1,9 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 
 const EventCard = ({ event }) => {
-  const { event_cover, title, desc, date_time, location } = event;
-
+  const { id, event_cover, title, desc, date_time, location } = event;
+  const navigate = useNavigate();
   return (
     <div
       className="
@@ -43,8 +44,10 @@ const EventCard = ({ event }) => {
           </span>
         </div>
 
-        {/* Attend Button */}
-        <button className="mt-3 px-5 py-2 bg-gradient-to-r from-red-400 to-pink-500 text-white font-semibold rounded-lg hover:scale-105 hover:from-red-500 hover:to-pink-600 transition transform duration-300">
+        <button
+          onClick={() => navigate(`event/${id}`)}
+          className="mt-3 px-5 py-2 bg-gradient-to-r from-red-400 to-pink-500 text-white font-semibold rounded-lg hover:scale-105 hover:from-red-500 hover:to-pink-600 transition transform duration-300"
+        >
           Attend
         </button>
       </div>

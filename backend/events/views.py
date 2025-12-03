@@ -21,7 +21,6 @@ class AllEventsView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-
 class AddEventView(APIView):
     permission_classes = [IsAuthenticated]
     def post(self,request):
@@ -32,11 +31,11 @@ class AddEventView(APIView):
         return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
 
 
-class EditEventView(APIView):
+class SingleEventView(APIView):
     permission_classes = [IsAuthenticated]
     def get(self,request, pk):
         event = get_object_or_404(Events,pk=pk)
-        serializer = EventSerializer(event)
+        serializer = EventSerializer(event,context={'request': request})
         return Response(serializer.data)
 
 

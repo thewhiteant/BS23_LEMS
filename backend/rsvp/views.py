@@ -8,9 +8,20 @@ from events.models import Events
 from .serializer import RSVPSerializer
 from events.serializer import EventSerializer
 
+
+
+
 # ----------------- 1. USER REGISTER VIEW -----------------
 class RegisterUserView(APIView):
     permission_classes = [IsAuthenticated]   # user must login
+
+    def get(self, request):
+        event_id = request.query_params.get("event_id")
+        if not event_id:
+            return Response({"message": "event_id is required!"}, status=status.HTTP_400_BAD_REQUEST)
+        event = get_object_or_404(Events, id=event_id)
+        is_registered = RSVP.objects.filter(event=event, user=request.user).exists()
+        return Response({"is_registered": is_registered}, status=status.HTTP_200_OK)
 
     def post(self, request):
         event_id = request.data.get("event_id")
@@ -34,9 +45,11 @@ class RegisterUserView(APIView):
             event=event,
             status="confirmed"
         )
-
+        user = request.user
+        user.attend_number_of_event = (user.attend_number_of_event or 0) + 1
+        user.save()
+        
         return Response({"token": rsvp.token}, status=status.HTTP_201_CREATED)
-
 
 
 # ----------------- 2. PUBLIC REGISTER VIEW -----------------

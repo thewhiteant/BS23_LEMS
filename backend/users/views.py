@@ -52,9 +52,6 @@ class LoginView(APIView):
         }, status=status.HTTP_200_OK)
 
 
-# ------------------------
-# Profile
-# ------------------------
 class ProfileView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -63,15 +60,19 @@ class ProfileView(APIView):
         return Response(serializer.data)
 
     def patch(self, request):
-        serializer = ProfileUpdateSerializer(request.user, data=request.data, partial=True, context={'request': request})
+        serializer = ProfileUpdateSerializer(
+                    request.user,
+                    data=request.data,
+                    partial=True,
+                    context={'request': request}
+                )
         serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(ProfileSerializer(request.user, context={'request': request}).data)
+        serializer.save()  
+        return Response(
+            ProfileSerializer(request.user, context={'request': request}).data,
+            status=status.HTTP_200_OK
+        )
 
-
-# ------------------------
-# Logout (blacklist refresh token)
-# ------------------------
 class LogoutView(APIView):
     permission_classes = [IsAuthenticated]
 
