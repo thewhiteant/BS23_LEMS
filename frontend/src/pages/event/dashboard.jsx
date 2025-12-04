@@ -5,6 +5,7 @@ import HeroSlider from "../../components/autoSlider";
 import EventCard from "../../components/eventCard";
 import Footer from "../../components/footer";
 import ProfileMenu from "../../components/profileMenu";
+import AdminMenu from "../../components/adminMenu";
 
 const Dashboard = () => {
   const [events, setEvents] = useState([]);
@@ -67,7 +68,8 @@ const Dashboard = () => {
               Browse upcoming events, workshops, and meetups.
             </p>
           </div>
-          <ProfileMenu />
+          {/* <ProfileMenu /> */}
+          <AdminMenu />
         </div>
 
         {/* Search & Filters */}

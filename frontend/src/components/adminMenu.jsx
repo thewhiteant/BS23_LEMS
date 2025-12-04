@@ -1,11 +1,17 @@
 import { useState, useRef, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import default_icon from "../assets/default_icon.png";
 
 const AdminMenu = () => {
   const [open, setOpen] = useState(false);
-  const menuRef = useRef(null);
 
-  // Close menu when clicking outside
+  const user = JSON.parse(localStorage.getItem("user")) || {};
+  const username = user.username || "User";
+  const profileImage = user.profile_image || default_icon;
+
+  const menuRef = useRef(null);
+  const navigate = useNavigate();
+
   useEffect(() => {
     const handler = (e) => {
       if (menuRef.current && !menuRef.current.contains(e.target)) {
@@ -18,43 +24,91 @@ const AdminMenu = () => {
 
   return (
     <div className="relative" ref={menuRef}>
-      {/* Small round admin toggle button */}
-      <img
-        src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png"
-        alt="admin"
-        className="w-10 h-10 rounded-full cursor-pointer border border-gray-300 bg-white"
+      {/* TOP BUTTON */}
+      <div
         onClick={() => setOpen(!open)}
-      />
+        className="flex items-center gap-3 cursor-pointer 
+        bg-white border border-gray-200 
+        rounded-full p-2 shadow-sm 
+        transition-all duration-200 hover:shadow-md hover:scale-[1.02]"
+      >
+        <img
+          src={profileImage}
+          alt="profile"
+          className="w-10 h-10 rounded-full object-cover border"
+        />
+        <span className="font-medium text-gray-700">{username}</span>
+        <span className="text-gray-500 text-xs">▼</span>
+      </div>
 
-      {/* Dropdown */}
+      {/* DROPDOWN */}
       {open && (
-        <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-100 py-2 z-50">
-          <Link
-            to="/admin/dashboard"
-            className="block px-4 py-2 hover:bg-gray-100"
-          >
-            📊 Dashboard
-          </Link>
-
-          <Link
-            to="/admin/create-event"
-            className="block px-4 py-2 hover:bg-gray-100"
-          >
-            ➕ Create Event
-          </Link>
-
-          <Link
-            to="/admin/event-requests"
-            className="block px-4 py-2 hover:bg-gray-100"
-          >
-            📥 Event Requests
-          </Link>
+        <div
+          className="
+            absolute right-0 mt-3 w-60 
+            bg-white border border-gray-200 
+            rounded-2xl shadow-xl z-50 
+            transition-all duration-150 
+            origin-top-right scale-100 opacity-100
+            animate-[fadeIn_0.15s_ease-out]
+          "
+        >
+          <div className="px-5 py-3 border-b border-gray-100">
+            <p className="font-semibold text-gray-800">{username}</p>
+            <p className="text-xs text-gray-500">Admin Account</p>
+          </div>
 
           <button
-            onClick={() => alert("Logout logic here")}
-            className="w-full text-left px-4 py-2 text-red-500 hover:bg-gray-100"
+            onClick={() => navigate("/admin/dashboard")}
+            className="w-full text-left px-5 py-2 hover:bg-gray-100 transition"
           >
-            🔴 Logout
+            🛡️ Admin Dashboard
+          </button>
+
+          <button
+            onClick={() => navigate("/admin/event/create")}
+            className="w-full text-left px-5 py-2 hover:bg-gray-100 transition"
+          >
+            ➕ Create Event
+          </button>
+
+          <button
+            onClick={() => navigate("/admin/event/invite")}
+            className="w-full text-left px-5 py-2 hover:bg-gray-100 transition"
+          >
+            ✉️ Event Invite
+          </button>
+
+          <div className="border-t my-2"></div>
+
+          {/* USER OPTIONS */}
+          <button
+            onClick={() => navigate("/user/dashboard")}
+            className="w-full text-left px-5 py-2 hover:bg-gray-100 transition"
+          >
+            📊 Dashboard
+          </button>
+
+          <button
+            onClick={() => navigate("/user/profile")}
+            className="w-full text-left px-5 py-2 hover:bg-gray-100 transition"
+          >
+            👤 Edit Profile
+          </button>
+
+          <button className="w-full text-left px-5 py-2 hover:bg-gray-100 transition">
+            ⚙️ Settings
+          </button>
+
+          <button className="w-full text-left px-5 py-2 hover:bg-gray-100 transition">
+            💬 Feedback
+          </button>
+
+          <button
+            onClick={() => navigate("/logout")}
+            className="w-full text-left px-5 py-2 text-red-500 hover:bg-red-50 transition"
+          >
+            🚪 Logout
           </button>
         </div>
       )}

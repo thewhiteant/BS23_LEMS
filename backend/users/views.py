@@ -86,3 +86,17 @@ class LogoutView(APIView):
             return Response({"message": "Logged out successfully."}, status=status.HTTP_205_RESET_CONTENT)
         except Exception:
             return Response({"error": "Invalid or expired token."}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class IsAdminView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+
+        # Works with Django default admin system
+        is_admin = user.is_staff or user.is_superuser
+
+        return Response({
+            "is_admin": is_admin
+        }, status=200)

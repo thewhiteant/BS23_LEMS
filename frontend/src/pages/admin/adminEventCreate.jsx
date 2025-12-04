@@ -1,6 +1,7 @@
 import { useState } from "react";
 import Footer from "../../components/footer";
-import AdminMenu from "../../components/adminMenu"; // Assume you have an Admin menu component
+import AdminMenu from "../../components/adminMenu";
+import api from "../../services/api";
 
 const AdminCreateEvent = () => {
   const [formData, setFormData] = useState({
@@ -15,6 +16,7 @@ const AdminCreateEvent = () => {
 
   const [imagePreview, setImagePreview] = useState(null);
   const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   // ---------------- HANDLE INPUT ---------------- //
   const handleChange = (e) => {
@@ -31,27 +33,33 @@ const AdminCreateEvent = () => {
   // ---------------- HANDLE SUBMIT ---------------- //
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    const body = new FormData();
-    for (const key in formData) {
-      if (formData[key] || formData[key] === 0) body.append(key, formData[key]);
-    }
+    setLoading(true);
 
     try {
-      const res = await fetch("/api/admin/create-event/", {
-        method: "POST",
-        body,
+      const data = new FormData();
+      data.append("title", formData.title);
+      data.append("desc", formData.desc);
+      data.append("date_time", formData.date_time);
+      data.append("location", formData.location);
+      data.append("max_attendees", formData.max_attendees);
+      data.append("price", formData.price);
+
+      if (formData.event_cover) {
+        data.append("event_cover", formData.event_cover);
+      }
+
+      await api.post("event/add/", data, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
       });
 
-      if (res.ok) {
-        setSubmitted(true);
-        alert("Event created successfully!");
-      } else {
-        alert("Failed to create event.");
-      }
-    } catch (err) {
-      console.error(err);
-      alert("Something went wrong.");
+      setSubmitted(true);
+    } catch (error) {
+      console.error("Event creation failed:", error);
+      alert("Failed to create event!");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -62,18 +70,26 @@ const AdminCreateEvent = () => {
       </div>
 
       <div className="max-w-4xl mx-auto bg-white shadow-xl rounded-2xl p-10 mt-4 mb-20">
-        <h1 className="text-3xl font-bold text-gray-800 mb-10">Create New Event</h1>
+        <h1 className="text-3xl font-bold text-gray-800 mb-10">
+          Create New Event
+        </h1>
 
         {submitted ? (
           <div className="text-center py-20">
-            <h2 className="text-2xl font-bold text-green-600 mb-4">Event Created!</h2>
-            <p className="text-gray-700">The event has been successfully added to the system.</p>
+            <h2 className="text-2xl font-bold text-green-600 mb-4">
+              Event Created!
+            </h2>
+            <p className="text-gray-700">
+              The event has been successfully added to the system.
+            </p>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Event Title */}
             <div>
-              <label className="block text-gray-700 font-medium mb-2">Event Title</label>
+              <label className="block text-gray-700 font-medium mb-2">
+                Event Title
+              </label>
               <input
                 type="text"
                 name="title"
@@ -84,9 +100,11 @@ const AdminCreateEvent = () => {
               />
             </div>
 
-            {/* Event Description */}
+            {/* Description */}
             <div>
-              <label className="block text-gray-700 font-medium mb-2">Description</label>
+              <label className="block text-gray-700 font-medium mb-2">
+                Description
+              </label>
               <textarea
                 name="desc"
                 value={formData.desc}
@@ -99,7 +117,9 @@ const AdminCreateEvent = () => {
 
             {/* Date & Time */}
             <div>
-              <label className="block text-gray-700 font-medium mb-2">Date & Time</label>
+              <label className="block text-gray-700 font-medium mb-2">
+                Date & Time
+              </label>
               <input
                 type="datetime-local"
                 name="date_time"
@@ -112,7 +132,9 @@ const AdminCreateEvent = () => {
 
             {/* Location */}
             <div>
-              <label className="block text-gray-700 font-medium mb-2">Location</label>
+              <label className="block text-gray-700 font-medium mb-2">
+                Location
+              </label>
               <input
                 type="text"
                 name="location"
@@ -125,7 +147,9 @@ const AdminCreateEvent = () => {
 
             {/* Max Attendees */}
             <div>
-              <label className="block text-gray-700 font-medium mb-2">Max Attendees</label>
+              <label className="block text-gray-700 font-medium mb-2">
+                Max Attendees
+              </label>
               <input
                 type="number"
                 name="max_attendees"
@@ -138,7 +162,9 @@ const AdminCreateEvent = () => {
 
             {/* Price */}
             <div>
-              <label className="block text-gray-700 font-medium mb-2">Price (Optional)</label>
+              <label className="block text-gray-700 font-medium mb-2">
+                Price (Optional)
+              </label>
               <input
                 type="number"
                 name="price"
@@ -150,7 +176,9 @@ const AdminCreateEvent = () => {
 
             {/* Event Cover */}
             <div>
-              <label className="block text-gray-700 font-medium mb-2">Event Cover</label>
+              <label className="block text-gray-700 font-medium mb-2">
+                Event Cover
+              </label>
               <input
                 type="file"
                 name="event_cover"
@@ -171,9 +199,10 @@ const AdminCreateEvent = () => {
             <div>
               <button
                 type="submit"
-                className="px-10 py-4 bg-gradient-to-r from-red-500 to-pink-600 text-white font-bold text-lg rounded-xl hover:scale-105 transition shadow-xl"
+                disabled={loading}
+                className="px-10 py-4 bg-gradient-to-r from-red-500 to-pink-600 text-white font-bold text-lg rounded-xl hover:scale-105 transition shadow-xl disabled:opacity-60"
               >
-                Create Event
+                {loading ? "Creating..." : "Create Event"}
               </button>
             </div>
           </form>

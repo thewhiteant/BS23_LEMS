@@ -10,7 +10,7 @@ import Dashbord from "./pages/event/dashboard";
 import EventPage from "./pages/event/eventPage";
 import ProfilePage from "./pages/users/profile";
 import UserDashboard from "./pages/users/dashboard";
-import AdminDashboard from "./pages/admin/adminDashbord";
+import AdminDashboard from "./pages/admin/adminDashboard";
 import UserEventRequestPage from "./pages/users/eventRequest";
 import AdminCreateEvent from "./pages/admin/adminEventCreate";
 import AdminEventEdit from "./pages/admin/adminEventEdit";
@@ -86,7 +86,7 @@ const router = createBrowserRouter([
     ),
   },
   {
-    path: "/admin/event/edit",
+    path: "/admin/event/edit/:id",
     element: (
       <ProtectedRoute>
         <AdminEventEdit />

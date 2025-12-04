@@ -1,82 +1,108 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Footer from "../../components/footer";
+import api from "../../services/api";
+import logo from "../../assets/images/cover.jpg";
 
 const AdminEventEdit = () => {
   const { id } = useParams();
   const navigate = useNavigate();
 
   const [loading, setLoading] = useState(true);
-  const [eventData, setEventData] = useState({
+
+  const [formData, setFormData] = useState({
     title: "",
-    description: "",
+    desc: "",
     date: "",
     time: "",
     location: "",
-    image: "",
+    max_attendees: "",
+    price: 0,
+    event_cover: null,
   });
 
-  const [imagePreview, setImagePreview] = useState("/default-banner.jpg");
+  const [imagePreview, setImagePreview] = useState(logo);
 
-  // Fetch event data
+  // ✅ FETCH SINGLE EVENT BY ID (FIXED)
   useEffect(() => {
-    const loadEvent = async () => {
+    const fetchSingleEvent = async () => {
       try {
-        const res = await fetch(`/api/events/${id}`);
-        const data = await res.json();
+        const res = await api.get(`event/edit/${id}`);
+        const data = res.data;
 
-        setEventData(data);
-        setImagePreview(data.image);
-        setLoading(false);
+        const isoDate = new Date(data.date_time);
+
+        setFormData({
+          title: data.title || "",
+          desc: data.desc || "",
+          date: isoDate.toISOString().split("T")[0],
+          time: isoDate.toTimeString().slice(0, 5),
+          location: data.location || "",
+          max_attendees: data.max_attendees || "",
+          price: data.price || 0,
+          event_cover: null,
+        });
+
+        setImagePreview(data.event_cover || logo);
       } catch (err) {
-        console.error(err);
+        console.error("Error loading event:", err);
+      } finally {
         setLoading(false);
       }
     };
 
-    loadEvent();
+    fetchSingleEvent();
   }, [id]);
 
-  // Handle text changes
   const handleChange = (e) => {
-    setEventData({ ...eventData, [e.target.name]: e.target.value });
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
   };
 
-  // Handle image upload
   const handleImageChange = (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    setEventData({ ...eventData, image: file });
+    setFormData({ ...formData, event_cover: file });
     setImagePreview(URL.createObjectURL(file));
   };
 
   const handleSubmit = async () => {
     const body = new FormData();
 
-    // append non-empty values
-    Object.keys(eventData).forEach((key) => {
-      if (eventData[key]) body.append(key, eventData[key]);
-    });
+    const dateTime = `${formData.date}T${formData.time}:00Z`;
+
+    body.append("title", formData.title);
+    body.append("desc", formData.desc);
+    body.append("date_time", dateTime);
+    body.append("location", formData.location);
+    body.append("max_attendees", formData.max_attendees);
+    body.append("price", formData.price);
+
+    if (formData.event_cover) {
+      body.append("event_cover", formData.event_cover);
+    }
 
     try {
-      const res = await fetch(`/api/events/${id}`, {
-        method: "PUT",
-        body,
+      const res = await api.put(`event/update/${id}/`, body, {
+        headers: {
+          "Content-Type": "multipart/form-data", // ✅ THIS FIXES IMAGE UPLOAD
+        },
       });
 
-      if (res.ok) {
+      if (res.status === 200) {
         alert("Event updated successfully!");
         navigate("/admin/dashboard");
       } else {
         alert("Update failed.");
       }
     } catch (err) {
-      console.error(err);
+      console.error("Update error:", err.response?.data || err.message);
       alert("Something went wrong.");
     }
   };
-
   if (loading) return <p className="p-10 text-lg">Loading event...</p>;
 
   return (
@@ -84,7 +110,6 @@ const AdminEventEdit = () => {
       <div className="max-w-4xl mx-auto bg-white shadow-xl rounded-2xl p-10 mt-10 mb-20">
         <h1 className="text-3xl font-bold text-gray-800 mb-10">Edit Event</h1>
 
-        {/* Event Image */}
         <div className="w-full mb-10">
           <img
             src={imagePreview}
@@ -95,6 +120,7 @@ const AdminEventEdit = () => {
           <label className="block text-sm font-medium text-gray-700 mt-5 mb-2">
             Change Banner Image
           </label>
+
           <input
             type="file"
             accept="image/*"
@@ -108,77 +134,81 @@ const AdminEventEdit = () => {
           />
         </div>
 
-        {/* Form Fields */}
+        {/* ✅ FORM FIELDS */}
         <div className="grid md:grid-cols-2 gap-8">
-
-          {/* Title */}
+          {/* TITLE */}
           <div className="md:col-span-2">
-            <label className="block text-gray-700 font-medium mb-2">Event Title</label>
+            <label className="block text-gray-700 font-medium mb-2">
+              Event Title
+            </label>
             <input
               type="text"
               name="title"
-              value={eventData.title}
+              value={formData.title}
               onChange={handleChange}
               className="w-full px-4 py-3 border border-gray-300 rounded-xl 
               focus:ring-2 focus:ring-pink-500 focus:border-transparent"
             />
           </div>
 
-          {/* Date */}
+          {/* DATE */}
           <div>
             <label className="block text-gray-700 font-medium mb-2">Date</label>
             <input
               type="date"
               name="date"
-              value={eventData.date}
+              value={formData.date}
               onChange={handleChange}
               className="w-full px-4 py-3 border border-gray-300 rounded-xl 
               focus:ring-2 focus:ring-pink-500 focus:border-transparent"
             />
           </div>
 
-          {/* Time */}
+          {/* TIME */}
           <div>
             <label className="block text-gray-700 font-medium mb-2">Time</label>
             <input
               type="time"
               name="time"
-              value={eventData.time}
+              value={formData.time}
               onChange={handleChange}
               className="w-full px-4 py-3 border border-gray-300 rounded-xl 
               focus:ring-2 focus:ring-pink-500 focus:border-transparent"
             />
           </div>
 
-          {/* Location */}
+          {/* LOCATION */}
           <div className="md:col-span-2">
-            <label className="block text-gray-700 font-medium mb-2">Location</label>
+            <label className="block text-gray-700 font-medium mb-2">
+              Location
+            </label>
             <input
               type="text"
               name="location"
-              value={eventData.location}
+              value={formData.location}
               onChange={handleChange}
               className="w-full px-4 py-3 border border-gray-300 rounded-xl 
               focus:ring-2 focus:ring-pink-500 focus:border-transparent"
             />
           </div>
 
-          {/* Description */}
+          {/* DESCRIPTION */}
           <div className="md:col-span-2">
-            <label className="block text-gray-700 font-medium mb-2">Description</label>
+            <label className="block text-gray-700 font-medium mb-2">
+              Description
+            </label>
             <textarea
-              name="description"
-              value={eventData.description}
+              name="desc"
+              value={formData.desc}
               onChange={handleChange}
               rows="4"
               className="w-full px-4 py-3 border border-gray-300 rounded-xl 
               focus:ring-2 focus:ring-pink-500 focus:border-transparent"
-            ></textarea>
+            />
           </div>
-
         </div>
 
-        {/* Buttons */}
+        {/* ✅ BUTTONS */}
         <div className="mt-12 flex gap-4">
           <button
             onClick={handleSubmit}
