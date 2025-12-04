@@ -11,6 +11,7 @@ urlpatterns = [
     path('dashboard/', UserDashboardView.as_view(), name='token_refresh'),
     path('profile/', ProfileView.as_view(), name='profile'),
     path('logout/', LogoutView.as_view(), name='logout'),
-    path("auth/is-admin/", IsAdminView.as_view(), name="is-admin"),
+    path("is-admin/", IsAdminView.as_view(), name="is-admin"),
+
 
 ]

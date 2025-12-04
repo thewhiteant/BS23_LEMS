@@ -3,10 +3,12 @@ import Footer from "../../components/footer";
 import ProfileMenu from "../../components/profileMenu";
 import { useNavigate, useParams } from "react-router-dom";
 import api from "../../services/api";
+import AdminMenu from "../../components/adminMenu";
 
 const EventPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const user = JSON.parse(localStorage.getItem("user"));
 
   const [eventData, setEventData] = useState(null);
   const [reg, setReg] = useState(false);
@@ -85,7 +87,7 @@ const EventPage = () => {
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
         <div className="absolute top-6 right-6 z-30">
-          <ProfileMenu />
+          {user?.is_staff ? <AdminMenu /> : <ProfileMenu />}
         </div>
         <div className="absolute bottom-0 left-0 p-8 md:p-12 lg:p-16 text-white max-w-5xl">
           <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold drop-shadow-2xl leading-tight">

@@ -7,6 +7,7 @@ import api from "../../services/api";
 const UserDashboard = () => {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
+  const user = JSON.parse(localStorage.getItem("user"));
 
   useEffect(() => {
     const fetchEvents = async () => {
@@ -41,7 +42,7 @@ const UserDashboard = () => {
   return (
     <div className="min-h-screen bg-gray-100">
       <div className="p-6 flex justify-end">
-        <ProfileMenu />
+        {user?.is_staff ? <AdminMenu /> : <ProfileMenu />}
       </div>
 
       <div className="max-w-5xl mx-auto p-6">

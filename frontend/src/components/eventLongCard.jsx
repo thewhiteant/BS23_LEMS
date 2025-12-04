@@ -4,6 +4,7 @@ import api from "../services/api";
 const EventCard = ({ event, onDelete }) => {
   const isUpcoming = new Date(event.date_time) > new Date();
   const navigate = useNavigate();
+  const user = JSON.parse(localStorage.getItem("user"));
 
   const deleteHandle = async () => {
     const confirmDelete = window.confirm(
@@ -60,22 +61,31 @@ const EventCard = ({ event, onDelete }) => {
           </span>
         </div>
       </div>
+      {user?.is_staff ? (
+        <div className="flex flex-row lg:flex-col gap-2 justify-center">
+          <button
+            onClick={() => navigate(`/admin/event/rsvp-list/${event.id}`)}
+            className="px-4 py-2 rounded-xl bg-green-500 text-white font-medium hover:bg-green-600 transition"
+          >
+            📝 RSVP List
+          </button>
+          <button
+            onClick={() => navigate(`/admin/event/edit/${event.id}`)}
+            className="px-4 py-2 rounded-xl bg-yellow-500 text-white font-medium hover:bg-yellow-600 transition"
+          >
+            ✏️ Edit
+          </button>
 
-      <div className="flex flex-row lg:flex-col gap-3 justify-end">
-        <button
-          onClick={() => navigate(`/admin/event/edit/${event.id}`)}
-          className="px-4 py-2 rounded-xl bg-yellow-500 text-white font-medium hover:bg-yellow-600 transition"
-        >
-          ✏️ Edit
-        </button>
-
-        <button
-          onClick={deleteHandle}
-          className="px-4 py-2 rounded-xl bg-red-500 text-white font-medium hover:bg-red-600 transition"
-        >
-          🗑️ Delete
-        </button>
-      </div>
+          <button
+            onClick={deleteHandle}
+            className="px-4 py-2 rounded-xl bg-red-500 text-white font-medium hover:bg-red-600 transition"
+          >
+            🗑️ Delete
+          </button>
+        </div>
+      ) : (
+        ""
+      )}
     </div>
   );
 };

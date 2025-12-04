@@ -14,7 +14,7 @@ const Dashboard = () => {
   const [query, setQuery] = useState("");
   const [locationFilter, setLocationFilter] = useState("all");
   const [visibleCount, setVisibleCount] = useState(8);
-
+  const user = JSON.parse(localStorage.getItem("user"));
   // Fetch events from backend
   useEffect(() => {
     const fetchEvents = async () => {
@@ -68,8 +68,7 @@ const Dashboard = () => {
               Browse upcoming events, workshops, and meetups.
             </p>
           </div>
-          {/* <ProfileMenu /> */}
-          <AdminMenu />
+          {user?.is_staff ? <AdminMenu /> : <ProfileMenu />}
         </div>
 
         {/* Search & Filters */}

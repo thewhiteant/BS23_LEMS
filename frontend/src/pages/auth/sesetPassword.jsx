@@ -42,7 +42,9 @@ const ResetPassword = () => {
         <h2 className="text-2xl font-bold text-center mb-6 text-white">
           Reset Password
         </h2>
-        {message && <p className="text-center mb-4 text-green-400">{message}</p>}
+        {message && (
+          <p className="text-center mb-4 text-green-400">{message}</p>
+        )}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-gray-300 mb-1">New Password</label>

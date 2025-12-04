@@ -49,7 +49,6 @@ const Signup = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-900">
       <div className="bg-gray-800 p-8 rounded-2xl shadow-lg w-full max-w-md text-gray-200">
-
         <div className="flex justify-center mb-6">
           <img src={logo} alt="Logo" className="h-25 w-35 object-contain" />
         </div>
@@ -61,7 +60,6 @@ const Signup = () => {
         {message && <p className="text-center mb-4 text-red-400">{message}</p>}
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          
           <div>
             <label className="block text-gray-300 mb-1">Username</label>
             <input
@@ -136,7 +134,6 @@ const Signup = () => {
             Login
           </Link>
         </p>
-
       </div>
     </div>
   );

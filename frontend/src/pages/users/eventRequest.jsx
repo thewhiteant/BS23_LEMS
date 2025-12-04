@@ -62,18 +62,27 @@ const UserEventRequestPage = () => {
       </div>
 
       <div className="max-w-4xl mx-auto bg-white shadow-xl rounded-2xl p-10 mt-4 mb-20">
-        <h1 className="text-3xl font-bold text-gray-800 mb-10">Request a New Event</h1>
+        <h1 className="text-3xl font-bold text-gray-800 mb-10">
+          Request a New Event
+        </h1>
 
         {submitted ? (
           <div className="text-center py-20">
-            <h2 className="text-2xl font-bold text-green-600 mb-4">Thank you!</h2>
-            <p className="text-gray-700">Your event request has been submitted and is pending admin approval.</p>
+            <h2 className="text-2xl font-bold text-green-600 mb-4">
+              Thank you!
+            </h2>
+            <p className="text-gray-700">
+              Your event request has been submitted and is pending admin
+              approval.
+            </p>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Event Title */}
             <div>
-              <label className="block text-gray-700 font-medium mb-2">Event Title</label>
+              <label className="block text-gray-700 font-medium mb-2">
+                Event Title
+              </label>
               <input
                 type="text"
                 name="title"
@@ -86,7 +95,9 @@ const UserEventRequestPage = () => {
 
             {/* Event Description */}
             <div>
-              <label className="block text-gray-700 font-medium mb-2">Description</label>
+              <label className="block text-gray-700 font-medium mb-2">
+                Description
+              </label>
               <textarea
                 name="desc"
                 value={formData.desc}
@@ -99,7 +110,9 @@ const UserEventRequestPage = () => {
 
             {/* Date & Time */}
             <div>
-              <label className="block text-gray-700 font-medium mb-2">Date & Time</label>
+              <label className="block text-gray-700 font-medium mb-2">
+                Date & Time
+              </label>
               <input
                 type="datetime-local"
                 name="date_time"
@@ -112,7 +125,9 @@ const UserEventRequestPage = () => {
 
             {/* Location */}
             <div>
-              <label className="block text-gray-700 font-medium mb-2">Location</label>
+              <label className="block text-gray-700 font-medium mb-2">
+                Location
+              </label>
               <input
                 type="text"
                 name="location"
@@ -125,7 +140,9 @@ const UserEventRequestPage = () => {
 
             {/* Max Attendees */}
             <div>
-              <label className="block text-gray-700 font-medium mb-2">Max Attendees</label>
+              <label className="block text-gray-700 font-medium mb-2">
+                Max Attendees
+              </label>
               <input
                 type="number"
                 name="max_attendees"
@@ -138,7 +155,9 @@ const UserEventRequestPage = () => {
 
             {/* Event Cover */}
             <div>
-              <label className="block text-gray-700 font-medium mb-2">Event Cover</label>
+              <label className="block text-gray-700 font-medium mb-2">
+                Event Cover
+              </label>
               <input
                 type="file"
                 name="event_cover"

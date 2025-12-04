@@ -93,9 +93,7 @@ class IsAdminView(APIView):
 
     def get(self, request):
         user = request.user
-
-        # Works with Django default admin system
-        is_admin = user.is_staff or user.is_superuser
+        is_admin = user.is_staff 
 
         return Response({
             "is_admin": is_admin
