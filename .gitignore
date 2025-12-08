@@ -28,3 +28,4 @@ dist-ssr
 Myenv/
 __pycache__
 *.sqlite3
+media/

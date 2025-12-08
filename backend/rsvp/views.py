@@ -9,6 +9,9 @@ from .serializer import RSVPSerializer
 from events.serializer import EventSerializer
 
 
+from django.core.mail import send_mail
+from django.shortcuts import render
+from django.http import HttpResponse
 
 
 class RegisterUserView(APIView):
@@ -199,11 +202,35 @@ class EventRSVPListView(APIView):
         serializer = RSVPSerializer(rsvps, many=True, context={'request': request})
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-#test
 
-# class Allrsvp(APIView):
-#     permission_classes = [AllowAny]
-#     def get(self,request):
-#         alldata = RSVP.objects.all()
-#         serializer = RSVPSerializer(alldata,many=True)
-#         return Response(serializer.data,status=status.HTTP_200_OK)
+
+
+# TODO: This section will infuture goes to notifcation app 
+
+
+
+class SendEmailAPIView(APIView):
+    def post(self, request, *args, **kwargs):
+        try:
+            recipient = request.data.get("recipient", "test@example.com")
+            subject = request.data.get("subject", "Hello from Django APIView")
+            message = request.data.get("message", "This is a test email from React.")
+
+            send_mail(
+                subject,
+                message,
+                None,  
+                [recipient],
+                fail_silently=False,
+            )
+
+            return Response(
+                {"status": "success", "message": "Email sent! Check console."},
+                status=status.HTTP_200_OK
+            )
+
+        except Exception as e:
+            return Response(
+                {"status": "error", "message": str(e)},
+                status=status.HTTP_400_BAD_REQUEST
+            )

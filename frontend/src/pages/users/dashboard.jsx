@@ -3,7 +3,7 @@ import ProfileMenu from "../../components/profileMenu";
 import Footer from "../../components/footer";
 import EventLongCard from "../../components/eventLongCard";
 import api from "../../services/api";
-
+import AdminMenu from "../../components/adminMenu";
 const UserDashboard = () => {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);

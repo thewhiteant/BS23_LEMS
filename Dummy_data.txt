@@ -41,49 +41,82 @@
 
 
 -------------------------------------------------------------
+Title: Annual Tech Expo 2024
+Description: A gathering of tech enthusiasts, showcasing innovations and new products.
+Date & Time: 2024-07-12 15:00
+Location: San Francisco
+Max Attendees: 350
+Attendees: 120
+Price: $45.50
 
+Title: Jazz Nights in the Park
+Description: Enjoy live jazz performances in the city park with food stalls and drinks.
+Date & Time: 2023-09-05 18:30
+Location: New Orleans
+Max Attendees: 200
+Attendees: 80
+Price: $30.00
 
+Title: Startup Pitch Weekend
+Description: Entrepreneurs pitch ideas to investors and mentors for feedback and funding.
+Date & Time: 2025-01-20 10:00
+Location: Boston
+Max Attendees: 150
+Attendees: 45
+Price: $60.00
 
-[
-  {
-    "title": "Alumni Meeting",
-    "desc": "Adarsha School Narayanganj Alumni Meeting",
-    "date_time": "2025-12-05T18:00:00Z",
-    "location": "Narayanganj",
-    "max_attendees": 200
-  } {
-    "title": "Alumni Meeting",
-    "desc": "Adarsha School Narayanganj Alumni Meeting",
-    "date_time": "2025-12-05T18:00:00Z",
-    "location": "Narayanganj",
-    "max_attendees": 200
-  },
-  {
-    "title": "Tech Conference 2025",
-    "desc": "A full-day conference on AI, Web, and Cloud technologies",
-    "date_time": "2025-11-20T10:00:00Z",
-    "location": "Dhaka International Convention Center",
-    "max_attendees": 500
-  },
-  {
-    "title": "Developers Meetup",
-    "desc": "Monthly gathering of software developers and engineers",
-    "date_time": "2025-10-15T15:00:00Z",
-    "location": "Banani, Dhaka",
-    "max_attendees": 120
-  },
-  {
-    "title": "Business Networking Night",
-    "desc": "Entrepreneurs and professionals meet & connect",
-    "date_time": "2025-09-10T19:30:00Z",
-    "location": "Gulshan Club, Dhaka",
-    "max_attendees": 300
-  },
-  {
-    "title": "University Reunion",
-    "desc": "Reunion event for the 2018–2022 university batch",
-    "date_time": "2025-08-25T17:00:00Z",
-    "location": "Chittagong University Campus",
-    "max_attendees": 250
-  }
-]
+Title: Food Truck Festival
+Description: Taste the best street food from local vendors and enjoy live music.
+Date & Time: 2023-08-18 12:00
+Location: Austin
+Max Attendees: 500
+Attendees: 300
+Price: $15.00
+
+Title: Winter Charity Ball
+Description: A formal event to raise funds for local charities with dinner and dancing.
+Date & Time: 2024-12-10 19:00
+Location: Chicago
+Max Attendees: 250
+Attendees: 180
+Price: $100.00
+
+Title: Summer Coding Bootcamp
+Description: Intensive coding sessions for beginners and intermediate learners.
+Date & Time: 2025-06-15 09:00
+Location: Seattle
+Max Attendees: 120
+Attendees: 60
+Price: $200.00
+
+Title: Outdoor Movie Night
+Description: Watch classic movies under the stars with family and friends.
+Date & Time: 2023-07-25 20:00
+Location: Los Angeles
+Max Attendees: 400
+Attendees: 250
+Price: $10.00
+
+Title: Photography Workshop
+Description: Learn photography techniques and editing tips from professionals.
+Date & Time: 2024-03-05 14:00
+Location: New York
+Max Attendees: 80
+Attendees: 40
+Price: $75.00
+
+Title: Marathon for a Cause
+Description: Join runners in a city marathon to raise awareness for health programs.
+Date & Time: 2023-10-10 06:00
+Location: Denver
+Max Attendees: 600
+Attendees: 500
+Price: $25.00
+
+Title: Art & Craft Fair
+Description: Explore handmade crafts and artworks from local artists.
+Date & Time: 2025-04-22 10:00
+Location: Portland
+Max Attendees: 300
+Attendees: 150
+Price: $5.00

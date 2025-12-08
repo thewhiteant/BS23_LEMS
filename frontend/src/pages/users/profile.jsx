@@ -24,7 +24,6 @@ const ProfilePage = () => {
         setFormData({
           username: res.data.username,
           phone: res.data.phone,
-          password: "",
           profile_image: null,
         });
 
@@ -62,7 +61,6 @@ const ProfilePage = () => {
     setFormData({
       username: originalData.username,
       phone: originalData.phone,
-      password: "",
       profile_image: null,
     });
 
@@ -72,16 +70,9 @@ const ProfilePage = () => {
 
   // ------------------ SAVE PROFILE ------------------
   const handleSubmit = async () => {
-    // ❗ REQUIRE PASSWORD WHEN SAVING
-    if (!formData.password || formData.password.trim() === "") {
-      alert("Password is required to save changes!");
-      return; // ❌ Do NOT continue
-    }
-
     const body = new FormData();
     body.append("username", formData.username);
     body.append("phone", formData.phone);
-    body.append("password", formData.password);
 
     if (formData.profile_image) {
       body.append("profile_image", formData.profile_image);
@@ -98,7 +89,6 @@ const ProfilePage = () => {
       setOriginalData(res.data);
 
       setIsEditing(false);
-      setFormData({ ...formData, password: "" });
     } catch (err) {
       console.error("Update error:", err);
       alert("Update failed!");
@@ -196,22 +186,6 @@ const ProfilePage = () => {
             {profile.attend_number_of_event !== 1 && "s"}
           </p>
         </div>
-
-        {/* PASSWORD FIELD */}
-        {isEditing && (
-          <div className="mt-10 border-t pt-8">
-            <h3 className="text-xl font-bold text-gray-800 mb-4">Password</h3>
-            <input
-              type="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              placeholder="Enter password to confirm changes"
-              className="w-full md:w-1/2 px-4 py-3 border rounded-xl"
-              required
-            />
-          </div>
-        )}
 
         {/* BUTTONS */}
         <div className="mt-12 flex gap-4">
