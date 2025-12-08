@@ -10,7 +10,11 @@ const api = axios.create({
 });
 
 // Endpoints that don’t require authentication
-const noAuthEndpoints = ["user/register/", "user/login/"];
+const noAuthEndpoints = [
+  "user/register/",
+  "user/login/",
+  "rsvp/guest-register/",
+];
 
 // Attach access token to requests
 api.interceptors.request.use(

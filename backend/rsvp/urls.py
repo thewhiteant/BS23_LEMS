@@ -5,6 +5,7 @@ from .views import RegisterUserView,RegisterPublicView,LinkGenaratorView,CancelR
 urlpatterns = [
         path('register/', RegisterUserView.as_view(), name='user_register'),
         path('guest-register/<str:token>', RegisterPublicView.as_view(), name='guest_register'),
+        path('guest-register/', RegisterPublicView.as_view(), name='guest_register_post'),
         path('cancel-rsvp/', CancelRSVPView.as_view(), name='cancel_rsvp'),
         path('invite-link',LinkGenaratorView.as_view(), name ="genarate_invite"),
         path("list/", EventRSVPListView.as_view(), name="event-rsvp-list"),

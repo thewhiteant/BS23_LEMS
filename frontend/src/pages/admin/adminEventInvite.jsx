@@ -23,7 +23,6 @@ const AdminEventInvite = () => {
     fetchEvents();
   }, []);
 
-  // ✅ GENERATE INVITE LINK
   const generateInvite = async () => {
     if (!selectedEvent) return alert("Please select an event.");
 
@@ -33,7 +32,11 @@ const AdminEventInvite = () => {
         event_id: selectedEvent,
       });
 
-      setInviteLink(res.data.link);
+      const backendLink = res.data.link;
+      const token = backendLink.split("/invite/")[1].replace("/", "");
+      const frontendLink = `${window.location.origin}/invite/${token}`;
+
+      setInviteLink(frontendLink);
     } catch {
       alert("Failed to generate invite.");
     }
@@ -41,12 +44,10 @@ const AdminEventInvite = () => {
     setLoading(false);
   };
 
-  // ✅ SHARE VIA GMAIL
   const shareViaGmail = () => {
-    if (!inviteLink) return alert("No invite link found!");
-
-    const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${email}&su=Event Invitation&body=${inviteLink}`;
-    window.open(gmailUrl, "_blank");
+    // if (!inviteLink) return alert("No invite link found!");
+    // const gmailUrl = ``;
+    // window.open(gmailUrl, "_blank");
   };
 
   return (

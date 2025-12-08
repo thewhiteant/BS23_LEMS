@@ -14,6 +14,11 @@ DEBUG = True
 ALLOWED_HOSTS = ["*"]  # Allow frontend requests
 # For production: replace "*" with your domain
 
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+DEFAULT_FROM_EMAIL = "no-reply@example.com"
+SERVER_EMAIL = DEFAULT_FROM_EMAIL
+
+
 
 # ---------------------------------------------------------
 # INSTALLED APPS
