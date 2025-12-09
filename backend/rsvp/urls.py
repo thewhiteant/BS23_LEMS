@@ -26,6 +26,7 @@ urlpatterns = [
         path("invite-tokens/<int:token_id>/delete/", InviteDeleteView.as_view(), name="invite-delete"),
         path("invite-tokens/<int:token_id>/expire/", InviteExpireView.as_view(), name="invite-expire"),
 
+
         #test 
         # path("allrsvp/",Allrsvp.as_view(),name="allview")
 

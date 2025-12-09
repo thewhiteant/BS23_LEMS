@@ -1,7 +1,8 @@
-# models.py
+# models.py (for RSVP and InviteToken)
+
 from django.db import models
 from django.conf import settings
-from events.models import Events  # make sure this is correct
+from events.models import Events 
 from django.utils import timezone
 import uuid
 from datetime import timedelta
@@ -11,9 +12,9 @@ class InviteToken(models.Model):
     event = models.ForeignKey(Events, on_delete=models.CASCADE, related_name="invite_tokens")
     token = models.UUIDField(default=uuid.uuid4, unique=True, db_index=True, editable=False)
     created_at = models.DateTimeField(auto_now_add=True)
-    is_used = models.BooleanField(default=False)  # Only one person can use this link
+    is_used = models.BooleanField(default=False) 
 
-    def is_expired(self, hours=24):  # you can change to 12, 48, etc.
+    def is_expired(self, hours=24): 
         expiry = self.created_at + timedelta(hours=hours)
         return timezone.now() > expiry
 
@@ -35,9 +36,10 @@ class RSVP(models.Model):
     )
 
     event = models.ForeignKey(Events, on_delete=models.CASCADE, related_name="rsvps")
-    guest_email = models.EmailField()
+    
+    # 🟢 FIX 1: Make guest_email explicitly nullable and 
+    guest_email = models.EmailField(blank=True, null=True) 
 
-    # This is the key: link RSVP back to the exact invite link used
     invite_token = models.ForeignKey(
         InviteToken,
         on_delete=models.SET_NULL,
@@ -46,13 +48,14 @@ class RSVP(models.Model):
         related_name="rsvps"
     )
 
-    token = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)  # for cancel link
+    token = models.UUIDField(default=uuid.uuid4, unique=True, editable=False) 
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="confirmed")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        unique_together = ("event", "guest_email")  
+        unique_together = (("event", "user"),) 
 
     def __str__(self):
-        return f"{self.guest_email or self.user} → {self.event.title}"
+        # Update display to show the email if user is not set
+        return f"{self.user.get_username() if self.user else self.guest_email} → {self.event.title}"

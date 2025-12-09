@@ -74,7 +74,7 @@ const UserDashboard = () => {
           ) : (
             <div className="grid gap-6">
               {pastEvents.map((ev) => (
-                <EventLongCard key={ev.id} event={ev} />
+                <EventLongCard key={ev.id} event={ev} token={""} />
               ))}
             </div>
           )}

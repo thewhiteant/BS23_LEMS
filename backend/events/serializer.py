@@ -1,21 +1,37 @@
 from rest_framework import serializers
 from .models import Events
-from django.conf import settings
+from rsvp.models import RSVP
 
 class EventSerializer(serializers.ModelSerializer):
 
 
     class Meta:
         model = Events
-        fields = "__all__"  # keep all fields
-        # optionally, replace 'event_cover' with 'event_cover_url' if you want only the full URL
+        fields = "__all__"  
 
-    # def get_event_cover_url(self, obj):
-    #     request = self.context.get('request')
-    #     if obj.event_cover:
-    #         # if request exists, use it to build absolute URI
-    #         if request:
-    #             return request.build_absolute_uri(obj.event_cover.url)
-    #         # fallback to BASE_URL from settings
-    #         return f"{settings.BASE_URL}{obj.event_cover.url}"
-    #     return None
+class CustomTokenAddedSerializer(serializers.ModelSerializer):
+    rsvp_token = serializers.SerializerMethodField()
+    class Meta:
+        model = Events
+        fields = [
+            "id",
+            "title",
+            "desc",
+            "date_time",
+            "location",
+            "attendees",
+            "max_attendees",
+            "event_cover",
+            "rsvp_token"  
+        ]
+
+    def get_rsvp_token(self, obj):
+        user = self.context.get("user")
+        if not user:
+            return None
+
+        rsvp = RSVP.objects.filter(user=user, event=obj).first()
+        if rsvp:
+            return str(rsvp.token)
+        return None
+

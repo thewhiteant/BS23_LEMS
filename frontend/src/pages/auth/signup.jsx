@@ -109,13 +109,13 @@ const Signup = () => {
           </div>
 
           <div>
-            <label className="block text-gray-300 mb-1">Phone</label>
+            <label className="block text-gray-300 mb-1">Phone (optional)</label>
             <input
               type="tel"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
               className="w-full bg-gray-700 border border-gray-600 rounded-md p-2 text-gray-100"
-              placeholder="Enter phone number"
+              placeholder="Enter phone number "
               required
             />
           </div>

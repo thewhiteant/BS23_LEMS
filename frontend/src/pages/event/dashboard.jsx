@@ -14,8 +14,10 @@ const Dashboard = () => {
   const [query, setQuery] = useState("");
   const [locationFilter, setLocationFilter] = useState("all");
   const [visibleCount, setVisibleCount] = useState(8);
+
   const user = JSON.parse(localStorage.getItem("user"));
-  // Fetch events from backend
+
+  // Fetch events
   useEffect(() => {
     const fetchEvents = async () => {
       try {
@@ -30,7 +32,7 @@ const Dashboard = () => {
     fetchEvents();
   }, []);
 
-  // Filter events based on search query and location
+  // Filter events
   const filteredEvents = useMemo(() => {
     const q = query.trim().toLowerCase();
     return events.filter((ev) => {
@@ -38,13 +40,11 @@ const Dashboard = () => {
       const desc = ev.desc?.toLowerCase() || "";
       const location = ev.location?.toLowerCase() || "";
 
-      // Location filter
       if (locationFilter === "dhaka" && !location.includes("dhaka"))
         return false;
       if (locationFilter === "online" && location.includes("dhaka"))
         return false;
 
-      // Search filter
       if (!q) return true;
       return title.includes(q) || desc.includes(q) || location.includes(q);
     });
@@ -54,21 +54,23 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-white to-gray-50">
-      {/* Hero Slider: Pass events if available */}
+      {/* Hero Slider */}
       <HeroSlider events={events.length > 0 ? events : undefined} />
 
+      {/* Floating Profile/Admin Menu (Top Right, Hover Over Slider) */}
+      <div className="fixed top-4 right-4 z-[9999]">
+        {user?.is_staff ? <AdminMenu /> : <ProfileMenu />}
+      </div>
+
       <main className="m-10 p-[10px]">
-        {/* Header */}
-        <div className="mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div>
-            <h1 className="text-cherry font-extrabold text-3xl sm:text-4xl md:text-5xl leading-tight">
-              All Events
-            </h1>
-            <p className="text-sm text-gray-500 mt-1">
-              Browse upcoming events, workshops, and meetups.
-            </p>
-          </div>
-          {user?.is_staff ? <AdminMenu /> : <ProfileMenu />}
+        {/* Header Title Only */}
+        <div className="mb-6">
+          <h1 className="text-cherry font-extrabold text-3xl sm:text-4xl md:text-5xl leading-tight">
+            All Events
+          </h1>
+          <p className="text-sm text-gray-500 mt-1">
+            Browse upcoming events, workshops, and meetups.
+          </p>
         </div>
 
         {/* Search & Filters */}
@@ -81,7 +83,7 @@ const Dashboard = () => {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search by title, description, or location..."
-              className="flex-1 px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-cherry focus:border-transparent"
+              className="flex-1 px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-cherry"
             />
 
             <select

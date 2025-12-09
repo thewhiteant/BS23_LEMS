@@ -67,8 +67,6 @@ const ProfilePage = () => {
     setImagePreview(originalData.profile_image || default_icon);
     setIsEditing(false);
   };
-
-  // ------------------ SAVE PROFILE ------------------
   const handleSubmit = async () => {
     const body = new FormData();
     body.append("username", formData.username);
@@ -85,10 +83,15 @@ const ProfilePage = () => {
 
       alert("Profile updated successfully!");
 
+      // Update profile state
       setProfile(res.data);
       setOriginalData(res.data);
-
       setIsEditing(false);
+
+      // ------------------ UPDATE LOCAL STORAGE ------------------
+      const storedUser = JSON.parse(localStorage.getItem("user")) || {};
+      const updatedUser = { ...storedUser, ...res.data };
+      localStorage.setItem("user", JSON.stringify(updatedUser));
     } catch (err) {
       console.error("Update error:", err);
       alert("Update failed!");

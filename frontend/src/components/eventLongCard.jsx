@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import api from "../services/api";
 
-const EventCard = ({ event, onDelete }) => {
+const EventCard = ({ event, onDelete, token }) => {
   const isUpcoming = new Date(event.date_time) > new Date();
   const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem("user"));
@@ -18,6 +18,20 @@ const EventCard = ({ event, onDelete }) => {
     } catch (err) {
       console.error("Delete failed:", err);
       alert("Failed to delete event!");
+    }
+  };
+
+  const handleCancle = async () => {
+    if (!window.confirm("Are you sure you want to cancel your RSVP?")) return;
+
+    try {
+      await api.post("rsvp/cancel-rsvp/", { token: token });
+      setMessage("❌ Your RSVP has been cancelled.");
+      setIsRegistered(false);
+      setRsvpToken(null);
+      setGuestEmail("");
+    } catch (err) {
+      setError(err.response?.data?.error || "Failed to cancel");
     }
   };
 
@@ -61,14 +75,17 @@ const EventCard = ({ event, onDelete }) => {
           </span>
         </div>
       </div>
+
+      {/* BUTTONS */}
       {user?.is_staff ? (
-        <div className="flex flex-row lg:flex-col gap-2 justify-center">
+        <div className="flex flex-col gap-2 items-start self-start">
           <button
             onClick={() => navigate(`/admin/event/rsvp-list/${event.id}`)}
             className="px-4 py-2 rounded-xl bg-green-500 text-white font-medium hover:bg-green-600 transition"
           >
             📝 RSVP List
           </button>
+
           <button
             onClick={() => navigate(`/admin/event/edit/${event.id}`)}
             className="px-4 py-2 rounded-xl bg-yellow-500 text-white font-medium hover:bg-yellow-600 transition"
@@ -84,7 +101,12 @@ const EventCard = ({ event, onDelete }) => {
           </button>
         </div>
       ) : (
-        ""
+        <button
+          onClick={handleCancle}
+          className="self-start px-5 py-2.5 rounded-2xl bg-gradient-to-r from-red-500 to-red-600 text-white font-semibold shadow-md hover:brightness-110 active:scale-95 transition-all duration-200"
+        >
+          ❌ Cancel
+        </button>
       )}
     </div>
   );
