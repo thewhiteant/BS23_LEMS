@@ -4,12 +4,15 @@ from rest_framework import status
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
 from .models import Users
-
+from django.shortcuts import get_object_or_404
+import random
+from django.core.mail import send_mail
 from .serializers import (
     RegisterSerializer,
     LoginSerializer,
     ProfileSerializer,
-    ProfileUpdateSerializer
+    ProfileUpdateSerializer,
+    ResetPasswordSerializer
 )
 
 
@@ -87,7 +90,6 @@ class LogoutView(APIView):
         except Exception:
             return Response({"error": "Invalid or expired token."}, status=status.HTTP_400_BAD_REQUEST)
 
-
 class IsAdminView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -98,3 +100,79 @@ class IsAdminView(APIView):
         return Response({
             "is_admin": is_admin
         }, status=200)
+    
+
+    
+class ForgotPasswordRequest(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        email = request.data.get("email")
+
+        if not email:
+            return Response({"error": "Email is required."},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        user = Users.objects.filter(email=email).first()
+
+        if not user:
+            return Response({"error": "No account found with this email."},
+                            status=status.HTTP_404_NOT_FOUND)
+
+        otp = random.randint(100000, 999999)
+        user.reset_otp = otp
+        user.save()
+
+        send_mail(
+            "Your Password Reset OTP",
+            f"Your OTP is: {otp}",
+            "noreply@example.com",
+            [email],
+            fail_silently=False,
+        )
+
+        return Response({"message": "OTP sent to your email."},
+                        status=status.HTTP_200_OK)
+
+
+# New endpoint: Verify OTP only
+class VerifyResetOTP(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        email = request.data.get("email")
+        otp = request.data.get("otp")
+
+        if not email or not otp:
+            return Response({"error": "Email and OTP are required."},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        user = Users.objects.filter(email=email).first()
+        if not user:
+            return Response({"error": "User not found."},
+                            status=status.HTTP_404_NOT_FOUND)
+
+        if str(user.reset_otp) != str(otp):
+            return Response({"error": "Invalid OTP."},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        # OTP is correct → allow user to proceed
+        return Response({"message": "OTP verified successfully."},
+                        status=status.HTTP_200_OK)
+
+
+# Reset password after OTP verification
+class ResetPasswordOTP(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        serializer = ResetPasswordSerializer(data=request.data)
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response(
+                {"message": "Password has been reset successfully."},
+                status=status.HTTP_200_OK
+            )
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

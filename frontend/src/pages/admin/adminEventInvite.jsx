@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import AdminMenu from "../../components/adminMenu";
 import Footer from "../../components/footer";
 import api from "../../services/api";
+import { useNavigate } from "react-router-dom";
 
 const AdminEventInvite = () => {
   const [events, setEvents] = useState([]);
@@ -12,6 +13,7 @@ const AdminEventInvite = () => {
   const [loading, setLoading] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const navigate = useNavigate();
 
   const dropdownRef = useRef();
 
@@ -193,6 +195,31 @@ const AdminEventInvite = () => {
       </div>
 
       <Footer />
+
+      {/* Floating Invite Management Button */}
+      <button
+        onClick={() => navigate("/admin/invite-management")}
+        className="fixed bottom-6 right-6 flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 
+             text-white font-semibold rounded-full shadow-2xl hover:scale-110 hover:shadow-blue-400/50 transition-transform duration-300"
+        title="Manage all generated invites"
+      >
+        {/* Optional icon */}
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          className="h-6 w-5"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8m0 8v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6m18-6l-9 6-9-6"
+          />
+        </svg>
+        Manage Invites
+      </button>
     </div>
   );
 };

@@ -1,46 +1,53 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import App from "./App";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 
-import InvitePage from "./pages/users/invitePage";
+import App from "./App";
+
+// Auth Pages
 import Login from "./pages/auth/login";
 import Signup from "./pages/auth/signup";
 import ForgotPassword from "./pages/auth/forgatePassowrd";
-import ResetPassword from "./pages/auth/sesetPassword";
+import ResetPassword from "./pages/auth/resetPassword";
 
-import Dashbord from "./pages/event/dashboard";
-import EventPage from "./pages/event/eventPage";
-
+// User Pages
+import InvitePage from "./pages/users/invitePage";
 import ProfilePage from "./pages/users/profile";
 import UserDashboard from "./pages/users/dashboard";
 import UserEventRequestPage from "./pages/users/eventRequest";
 
+// Admin Pages
 import AdminDashboard from "./pages/admin/adminDashboard";
 import AdminCreateEvent from "./pages/admin/adminEventCreate";
 import AdminEventEdit from "./pages/admin/adminEventEdit";
 import AdminEventInvite from "./pages/admin/adminEventInvite";
 import EventRSVPPage from "./pages/admin/eventRSVPPage";
 
+// Event Pages
+import Dashbord from "./pages/event/dashboard";
+import EventPage from "./pages/event/eventPage";
+
+// Components
 import ProtectedRoute from "./components/protectedRoute";
 import Logout from "./components/logout";
+import InviteManagement from "./pages/admin/inviteManagement";
 
-// ✅ SIMPLE UNAUTHORIZED PAGE
-const Unauthorized = () => {
-  return (
-    <div className="min-h-screen flex items-center justify-center text-2xl text-red-600">
-      🚫 Admin Access Only
-    </div>
-  );
-};
+// Unauthorized Page
+const Unauthorized = () => (
+  <div className="min-h-screen flex items-center justify-center text-2xl text-red-600">
+    🚫 Admin Access Only
+  </div>
+);
 
 const router = createBrowserRouter([
-  // ✅ ✅ PUBLIC ROUTES
+  // PUBLIC ROUTES
   { path: "/login", element: <Login /> },
   { path: "/signup", element: <Signup /> },
   { path: "/forgot", element: <ForgotPassword /> },
+  { path: "/reset", element: <ResetPassword /> }, // no ProtectedRoute
   { path: "/invite/:token", element: <InvitePage /> },
 
+  // PRIVATE ROUTES (LOGGED-IN USERS)
   {
     path: "/",
     element: (
@@ -57,8 +64,6 @@ const router = createBrowserRouter([
       </ProtectedRoute>
     ),
   },
-
-  // ✅ ✅ USER ROUTES (ALL LOGGED-IN USERS)
   {
     path: "/user/profile",
     element: (
@@ -84,7 +89,7 @@ const router = createBrowserRouter([
     ),
   },
 
-  // ✅ ✅ ADMIN ROUTES (ADMIN ONLY)
+  // ADMIN ROUTES
   {
     path: "/admin/dashboard",
     element: (
@@ -117,6 +122,16 @@ const router = createBrowserRouter([
       </ProtectedRoute>
     ),
   },
+
+  {
+    path: "/admin/invite-management",
+    element: (
+      <ProtectedRoute adminOnly={true}>
+        <InviteManagement />
+      </ProtectedRoute>
+    ),
+  },
+
   {
     path: "/admin/event/rsvp-list/:id",
     element: (
@@ -126,16 +141,7 @@ const router = createBrowserRouter([
     ),
   },
 
-  {
-    path: "/reset",
-    element: (
-      <ProtectedRoute>
-        <ResetPassword />
-      </ProtectedRoute>
-    ),
-  },
-
-  // ✅ ✅ LOGOUT
+  // LOGOUT
   {
     path: "/logout",
     element: (
@@ -145,13 +151,10 @@ const router = createBrowserRouter([
     ),
   },
 
-  // ✅ ✅ UNAUTHORIZED PAGE
-  {
-    path: "/unauthorized",
-    element: <Unauthorized />,
-  },
+  // UNAUTHORIZED
+  { path: "/unauthorized", element: <Unauthorized /> },
 
-  // ✅ ✅ 404 PAGE (OPTIONAL)
+  // 404 PAGE
   {
     path: "*",
     element: (

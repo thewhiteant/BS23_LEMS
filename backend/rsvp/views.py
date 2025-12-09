@@ -5,7 +5,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.shortcuts import get_object_or_404
 from .models import RSVP, InviteToken
 from events.models import Events
-from .serializer import RSVPSerializer 
+from .serializer import RSVPSerializer ,InviteTokenSerializer
 from events.serializer import EventSerializer
 
 
@@ -234,3 +234,44 @@ class SendEmailAPIView(APIView):
                 {"status": "error", "message": str(e)},
                 status=status.HTTP_400_BAD_REQUEST
             )
+
+
+
+
+#---------------------------------- Invite Management -------------------
+class InviteListView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        invites = InviteToken.objects.prefetch_related("rsvps__user").select_related("event").all().order_by("-created_at")
+        
+        # ✅ Check for query param "expired"
+        expired_param = request.query_params.get("expired")
+        if expired_param is not None:
+            if expired_param.lower() == "true":
+                invites = [invite for invite in invites if invite.is_expired(hours=12)]
+            elif expired_param.lower() == "false":
+                invites = [invite for invite in invites if not invite.is_expired(hours=12)]
+
+        serializer = InviteTokenSerializer(invites, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+class InviteDeleteView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request, token_id):
+        invite = get_object_or_404(InviteToken, id=token_id)
+        invite.delete()
+        return Response({"status": "success"}, status=status.HTTP_200_OK)
+    
+
+class InviteExpireView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, token_id):
+        invite = get_object_or_404(InviteToken, id=token_id)
+        # Force expire by setting created_at far in the past
+        from django.utils import timezone
+        invite.created_at = timezone.now() - timezone.timedelta(hours=24)
+        invite.save()
+        return Response({"status": "success", "message": "Invite expired"}, status=status.HTTP_200_OK)

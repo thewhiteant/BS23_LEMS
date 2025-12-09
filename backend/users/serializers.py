@@ -100,9 +100,6 @@ class ProfileSerializer(serializers.ModelSerializer):
         read_only_fields = ['id', 'is_staff', 'date_joined', 'attend_number_of_event']
 
 
-# ------------------------
-# Profile Update Serializer
-# ------------------------
 class ProfileUpdateSerializer(serializers.ModelSerializer):
     profile_image = serializers.ImageField(required=False, allow_null=True)
     current_password = serializers.CharField(write_only=True, required=True, min_length=6)
@@ -130,3 +127,36 @@ class ProfileUpdateSerializer(serializers.ModelSerializer):
         validated_data.pop('current_password', None)  
         return super().update(instance, validated_data)
 
+
+
+class ResetPasswordSerializer(serializers.ModelSerializer):
+    new_password = serializers.CharField(write_only=True, min_length=8)
+    confirm_password = serializers.CharField(write_only=True, min_length=8)
+    email = serializers.EmailField(write_only=True)
+
+    class Meta:
+        model = Users
+        fields = ["email", "new_password", "confirm_password"]
+
+    def validate(self, attrs):
+        if attrs["new_password"] != attrs["confirm_password"]:
+            raise serializers.ValidationError("Passwords do not match.")
+        return attrs
+
+    def validate_email(self, value):
+        if not Users.objects.filter(email=value).exists():
+            raise serializers.ValidationError("No account found with this email.")
+        return value
+
+    def save(self, **kwargs):
+        email = self.validated_data["email"]
+        user = Users.objects.filter(email=email).first()
+
+        if not user:
+            raise serializers.ValidationError({"email": "User not found."})
+
+        # Reset password directly
+        user.set_password(self.validated_data["new_password"])
+        user.save()
+
+        return user

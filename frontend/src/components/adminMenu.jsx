@@ -57,7 +57,12 @@ const AdminMenu = () => {
             <p className="font-semibold text-gray-800">{username}</p>
             <p className="text-xs text-gray-500">Admin Account</p>
           </div>
-
+          <button
+            onClick={() => navigate("/")}
+            className="w-full text-left px-5 py-2 hover:bg-gray-100 transition"
+          >
+            🏠 Home
+          </button>
           <button
             onClick={() => navigate("/admin/dashboard")}
             className="w-full text-left px-5 py-2 hover:bg-gray-100 transition"

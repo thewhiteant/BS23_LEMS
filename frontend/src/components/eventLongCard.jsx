@@ -46,7 +46,7 @@ const EventCard = ({ event, onDelete }) => {
             </p>
             <p>📍 {event.location}</p>
             <p>
-              👥 {event.attendees_count} / {event.max_attendees} RSVPs
+              👥 {event.attendees} / {event.max_attendees} RSVPs
             </p>
           </div>
 

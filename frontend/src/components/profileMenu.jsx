@@ -59,6 +59,12 @@ const ProfileMenu = () => {
           </div>
 
           <button
+            onClick={() => navigate("/")}
+            className="w-full text-left px-5 py-2 hover:bg-gray-100 transition"
+          >
+            🏠 Home
+          </button>
+          <button
             onClick={() => navigate("/user/dashboard")}
             className="w-full text-left px-5 py-2 hover:bg-gray-100 transition"
           >
