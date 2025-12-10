@@ -1,34 +1,41 @@
 import { useEffect, useState } from "react";
 import Footer from "../../components/footer";
 import ProfileMenu from "../../components/profileMenu";
-import { useParams } from "react-router-dom";
+import { replace, useNavigate, useParams } from "react-router-dom";
 import api from "../../services/api";
-import AdminMenu from "../../components/adminMenu";
 
 const InvitePage = () => {
   const { token } = useParams();
-  const user = JSON.parse(localStorage.getItem("user"));
 
+  const user = JSON.parse(localStorage.getItem("user"));
   const [guestEmail, setGuestEmail] = useState("");
   const [eventData, setEventData] = useState(null);
   const [isRegistered, setIsRegistered] = useState(false);
   const [rsvpToken, setRsvpToken] = useState(null);
+  const [rsvpCreatedAt, setRsvpCreatedAt] = useState(null); // ⭐ NEW
   const [loading, setLoading] = useState(false);
   const [pageLoading, setPageLoading] = useState(true);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const navigate = useNavigate();
 
-  // ✅ FETCH EVENT
   useEffect(() => {
     const fetchEventFromToken = async () => {
       try {
         const res = await api.get(`rsvp/guest-register/${token}`);
         setEventData(res.data.event);
 
+        // If logged in user tries to open invite → redirect
+        if (user) {
+          navigate(`/event/${res.data.event.id}`, replace);
+        }
+
+        // If guest already registered
         if (res.data.is_registered) {
           setIsRegistered(true);
           setRsvpToken(res.data.rsvp_token);
           setGuestEmail(res.data.guest_email || "");
+          setRsvpCreatedAt(res.data.rsvp_created_at || null); // ⭐ NEW
         }
       } catch (err) {
         setError("Invalid or expired invite link.");
@@ -40,7 +47,6 @@ const InvitePage = () => {
     fetchEventFromToken();
   }, [token]);
 
-  // ✅ REGISTER
   const handleRegister = async () => {
     if (!guestEmail.trim()) {
       setError("Please enter your email");
@@ -60,6 +66,7 @@ const InvitePage = () => {
       setMessage("🎉 Successfully registered!");
       setIsRegistered(true);
       setRsvpToken(res.data.token);
+      setRsvpCreatedAt(res.data.rsvp_created_at); // ⭐ NEW
     } catch (err) {
       setError(err.response?.data?.error || "Registration failed");
     } finally {
@@ -67,7 +74,17 @@ const InvitePage = () => {
     }
   };
 
-  // ✅ CANCEL RSVP
+  // ⭐ 24-HOUR CANCEL LIMIT LOGIC
+  const canCancel = (() => {
+    if (!rsvpCreatedAt) return false;
+
+    const created = new Date(rsvpCreatedAt);
+    const now = new Date();
+    const hours = (now - created) / (1000 * 60 * 60);
+
+    return hours < 24; // Only allow cancel within 24 hours
+  })();
+
   const handleCancel = async () => {
     if (!window.confirm("Are you sure you want to cancel your RSVP?")) return;
 
@@ -100,7 +117,7 @@ const InvitePage = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
-      {/* ✅ HERO */}
+      {/* HERO */}
       <div className="relative w-full h-[60vh] overflow-hidden">
         <img
           src={eventData.event_cover}
@@ -108,10 +125,6 @@ const InvitePage = () => {
           className="w-full h-full object-cover"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
-
-        <div className="absolute top-6 right-6 z-30">
-          {user?.is_staff ? <AdminMenu /> : <ProfileMenu />}
-        </div>
 
         <div className="absolute bottom-6 left-6 md:left-12 text-white max-w-5xl">
           <h1 className="text-4xl md:text-6xl font-extrabold">
@@ -124,12 +137,11 @@ const InvitePage = () => {
         </div>
       </div>
 
-      {/* ✅ MAIN */}
+      {/* MAIN */}
       <main className="flex-1 max-w-7xl mx-auto px-6 md:px-10 py-16 w-full">
         <div className="grid lg:grid-cols-3 gap-12">
-          {/* ✅ LEFT CONTENT */}
+          {/* LEFT CONTENT */}
           <div className="lg:col-span-2 space-y-14">
-            {/* ABOUT */}
             <section>
               <h2 className="text-3xl font-bold text-gray-900 mb-6">
                 About This Event
@@ -145,7 +157,7 @@ const InvitePage = () => {
                 Event Details
               </h2>
 
-              <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-10 space-y-12">
+              <div className="bg-white rounded-2xl shadow-lg border p-10 space-y-12">
                 {/* Date & Time */}
                 <div className="flex items-center gap-8">
                   <div className="w-20 h-20 bg-red-100 rounded-2xl flex items-center justify-center">
@@ -233,7 +245,7 @@ const InvitePage = () => {
             </section>
           </div>
 
-          {/* ✅ RSVP CARD */}
+          {/* RSVP CARD */}
           <div>
             <div className="bg-white rounded-3xl shadow-xl border p-8 sticky top-24">
               <h3 className="text-2xl font-bold mb-8 text-center">
@@ -249,12 +261,19 @@ const InvitePage = () => {
                     <p className="text-sm text-gray-700 mt-2">{guestEmail}</p>
                   </div>
 
-                  <button
-                    onClick={handleCancel}
-                    className="w-full py-4 font-bold text-white bg-red-600 rounded-xl hover:bg-red-700 transition"
-                  >
-                    Cancel My RSVP
-                  </button>
+                  {/* ⭐ CANCEL WITH 24-HOUR LIMIT */}
+                  {canCancel ? (
+                    <button
+                      onClick={handleCancel}
+                      className="w-full py-4 font-bold text-white bg-red-600 rounded-xl hover:bg-red-700 transition"
+                    >
+                      Cancel My RSVP
+                    </button>
+                  ) : (
+                    <p className="text-center text-gray-600 font-medium bg-gray-100 border border-gray-300 p-4 rounded-xl">
+                      ⏳ Cancellation period expired (24 hours passed)
+                    </p>
+                  )}
                 </div>
               ) : (
                 <div className="space-y-6">

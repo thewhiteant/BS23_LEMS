@@ -10,15 +10,30 @@ from django.core.mail import send_mail
 from .serializers import (
     RegisterSerializer,
     LoginSerializer,
-    ProfileSerializer,
     ProfileUpdateSerializer,
-    ResetPasswordSerializer
+    ResetPasswordSerializer,
+    UserResponseSerializer,
+    ResponseMessages,
+    ForgotPasswordSerializer,
+    OTPVerifySerializer
 )
 
+class LoginView(APIView):
+    permission_classes = [AllowAny]
 
-# ------------------------
-# Register
-# ------------------------
+    def post(self, request):
+        serializer = LoginSerializer(
+            data=request.data,
+            context={'request':request}
+        )
+        serializer.is_valid(raise_exception=True)
+
+        return Response(
+            serializer.data,
+            status=status.HTTP_200_OK
+            )
+
+
 class RegisterView(APIView):
     permission_classes = [AllowAny]
 
@@ -26,40 +41,14 @@ class RegisterView(APIView):
         serializer = RegisterSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return Response({"message": "User registered successfully"}, status=status.HTTP_201_CREATED)
-
-    def get(self, request):
-        return Response({"message": "Method Not Allowed"}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
-
-
-# ------------------------
-# Login (return tokens in JSON)
-# ------------------------
-class LoginView(APIView):
-    permission_classes = [AllowAny]
-
-    def post(self, request):
-        serializer = LoginSerializer(data=request.data, context={"request": request})
-        serializer.is_valid(raise_exception=True)
-
-        user = serializer.validated_data["user"]
-
-        # Generate tokens
-        refresh = RefreshToken.for_user(user)
-        access = refresh.access_token
-
-        return Response({
-            "user": serializer.to_representation({"user": user})["user"],  # user data
-            "access": str(access),
-            "refresh": str(refresh),
-        }, status=status.HTTP_200_OK)
+        return Response(serializer.data,status.HTTP_201_CREATED)
 
 
 class ProfileView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        serializer = ProfileSerializer(request.user, context={'request': request})
+        serializer = UserResponseSerializer(request.user, context={'request': request})
         return Response(serializer.data)
 
     def patch(self, request):
@@ -72,9 +61,10 @@ class ProfileView(APIView):
         serializer.is_valid(raise_exception=True)
         serializer.save()  
         return Response(
-            ProfileSerializer(request.user, context={'request': request}).data,
+            serializer.data,
             status=status.HTTP_200_OK
         )
+    
 
 class LogoutView(APIView):
     permission_classes = [IsAuthenticated]
@@ -82,42 +72,37 @@ class LogoutView(APIView):
     def post(self, request):
         refresh_token = request.data.get("refresh")
         if not refresh_token:
-            return Response({"error": "Refresh token is required."}, status=status.HTTP_400_BAD_REQUEST)
-
+            
+            return Response(
+                {"error": ResponseMessages.REFRESH_TOKEN_REQUIRED},
+                status=status.HTTP_400_BAD_REQUEST
+            )
         try:
             RefreshToken(refresh_token).blacklist()
-            return Response({"message": "Logged out successfully."}, status=status.HTTP_205_RESET_CONTENT)
+            
+            return Response(
+                {"message": ResponseMessages.LOGOUT},
+                status=status.HTTP_205_RESET_CONTENT
+            )
         except Exception:
-            return Response({"error": "Invalid or expired token."}, status=status.HTTP_400_BAD_REQUEST)
+            
+            return Response(
+                {"error": ResponseMessages.INVALID_TOKEN},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
-class IsAdminView(APIView):
-    permission_classes = [IsAuthenticated]
 
-    def get(self, request):
-        user = request.user
-        is_admin = user.is_staff 
-
-        return Response({
-            "is_admin": is_admin
-        }, status=200)
-    
-
-    
 class ForgotPasswordRequest(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
-        email = request.data.get("email")
+        serializer = ForgotPasswordSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
 
-        if not email:
-            return Response({"error": "Email is required."},
-                            status=status.HTTP_400_BAD_REQUEST)
-
+        email = serializer.validated_data['email'].lower()
         user = Users.objects.filter(email=email).first()
-
         if not user:
-            return Response({"error": "No account found with this email."},
-                            status=status.HTTP_404_NOT_FOUND)
+            return Response({"message": ResponseMessages.INVALID_EMAIL}, status=400)
 
         otp = random.randint(100000, 999999)
         user.reset_otp = otp
@@ -131,37 +116,24 @@ class ForgotPasswordRequest(APIView):
             fail_silently=False,
         )
 
-        return Response({"message": "OTP sent to your email."},
-                        status=status.HTTP_200_OK)
+        return Response({"message": ResponseMessages.OTP_SENT}, status=200)
 
 
-# New endpoint: Verify OTP only
 class VerifyResetOTP(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
-        email = request.data.get("email")
-        otp = request.data.get("otp")
+        serializer = OTPVerifySerializer(data=request.data)
+        if serializer.is_valid():
 
-        if not email or not otp:
-            return Response({"error": "Email and OTP are required."},
-                            status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"message": ResponseMessages.OTP_VERIFIED},
+                status=status.HTTP_200_OK
+            )
 
-        user = Users.objects.filter(email=email).first()
-        if not user:
-            return Response({"error": "User not found."},
-                            status=status.HTTP_404_NOT_FOUND)
-
-        if str(user.reset_otp) != str(otp):
-            return Response({"error": "Invalid OTP."},
-                            status=status.HTTP_400_BAD_REQUEST)
-
-        # OTP is correct → allow user to proceed
-        return Response({"message": "OTP verified successfully."},
-                        status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-# Reset password after OTP verification
 class ResetPasswordOTP(APIView):
     permission_classes = [AllowAny]
 
@@ -176,3 +148,16 @@ class ResetPasswordOTP(APIView):
             )
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+
+
+# class IsAdminView(APIView):
+#     permission_classes = [IsAuthenticated]
+
+#     def get(self, request):
+#         user = request.user
+#         is_admin = user.is_staff 
+
+#         return Response({
+#             "is_admin": is_admin
+#         }, status=200)

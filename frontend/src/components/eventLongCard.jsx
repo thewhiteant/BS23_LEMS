@@ -1,10 +1,39 @@
 import { useNavigate } from "react-router-dom";
 import api from "../services/api";
 
-const EventCard = ({ event, onDelete, token }) => {
-  const isUpcoming = new Date(event.date_time) > new Date();
+const EventCard = ({ event, onDelete }) => {
   const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem("user"));
+
+  const isUpcoming = new Date(event.date_time) > new Date();
+
+  // =============================
+  //  CHECK IF USER CAN CANCEL
+  // =============================
+  let canCancel = false;
+
+  if (event.rsvp_status === "confirmed" && event.rsvp_created_at) {
+    const created = new Date(event.rsvp_created_at);
+    const now = new Date();
+
+    const hoursPassed = (now - created) / (1000 * 60 * 60);
+
+    if (hoursPassed < 24 && isUpcoming) {
+      canCancel = true;
+    }
+  }
+
+  const handleCancel = async () => {
+    if (!window.confirm("Are you sure you want to cancel your RSVP?")) return;
+
+    try {
+      await api.post("rsvp/cancel-rsvp/", { token: event.token });
+      alert("❌ Your RSVP has been cancelled.");
+      window.location.reload();
+    } catch (err) {
+      alert(err.response?.data?.error || "Failed to cancel");
+    }
+  };
 
   const deleteHandle = async () => {
     const confirmDelete = window.confirm(
@@ -16,22 +45,7 @@ const EventCard = ({ event, onDelete, token }) => {
       await api.delete(`event/delete/${event.id}/`);
       onDelete(event.id);
     } catch (err) {
-      console.error("Delete failed:", err);
       alert("Failed to delete event!");
-    }
-  };
-
-  const handleCancle = async () => {
-    if (!window.confirm("Are you sure you want to cancel your RSVP?")) return;
-
-    try {
-      await api.post("rsvp/cancel-rsvp/", { token: token });
-      setMessage("❌ Your RSVP has been cancelled.");
-      setIsRegistered(false);
-      setRsvpToken(null);
-      setGuestEmail("");
-    } catch (err) {
-      setError(err.response?.data?.error || "Failed to cancel");
     }
   };
 
@@ -47,7 +61,6 @@ const EventCard = ({ event, onDelete, token }) => {
 
         <div className="flex-1">
           <h3 className="text-xl font-semibold text-gray-800">{event.title}</h3>
-
           <p className="text-gray-600 mt-1 line-clamp-2">{event.desc}</p>
 
           <div className="mt-3 space-y-1 text-sm text-gray-700">
@@ -76,8 +89,9 @@ const EventCard = ({ event, onDelete, token }) => {
         </div>
       </div>
 
-      {/* BUTTONS */}
+      {/* RIGHT SIDE BUTTONS */}
       {user?.is_staff ? (
+        // ADMIN BUTTONS
         <div className="flex flex-col gap-2 items-start self-start">
           <button
             onClick={() => navigate(`/admin/event/rsvp-list/${event.id}`)}
@@ -101,12 +115,35 @@ const EventCard = ({ event, onDelete, token }) => {
           </button>
         </div>
       ) : (
-        <button
-          onClick={handleCancle}
-          className="self-start px-5 py-2.5 rounded-2xl bg-gradient-to-r from-red-500 to-red-600 text-white font-semibold shadow-md hover:brightness-110 active:scale-95 transition-all duration-200"
-        >
-          ❌ Cancel
-        </button>
+        // USER SIDE BUTTONS
+        <div className="self-start">
+          {/* ALREADY CANCELLED */}
+          {event.rsvp_status === "cancelled" && (
+            <button
+              disabled
+              className="px-5 py-2.5 rounded-2xl bg-gray-300 text-gray-600 font-semibold cursor-not-allowed"
+            >
+              🚫 Cancelled
+            </button>
+          )}
+
+          {/* CANCEL ALLOWED (within 24h) */}
+          {canCancel && (
+            <button
+              onClick={handleCancel}
+              className="px-5 py-2.5 rounded-2xl bg-gradient-to-r from-red-500 to-red-600 text-white font-semibold shadow-md hover:brightness-110 active:scale-95 transition-all duration-200"
+            >
+              ❌ Cancel
+            </button>
+          )}
+
+          {/* 24h expired → hide cancel, show text */}
+          {!canCancel && event.rsvp_status === "confirmed" && isUpcoming && (
+            <p className="text-gray-500 text-sm mt-2">
+              ⏳ Cancellation window expired
+            </p>
+          )}
+        </div>
       )}
     </div>
   );

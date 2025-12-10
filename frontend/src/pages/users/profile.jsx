@@ -2,115 +2,130 @@ import { useState, useEffect } from "react";
 import Footer from "../../components/footer";
 import api from "../../services/api";
 import default_icon from "../../assets/default_icon.png";
+import { useNavigate } from "react-router-dom";
 
 const ProfilePage = () => {
-  // ------------------ PROFILE STATE (from API) ------------------
   const [profile, setProfile] = useState(null);
-
-  // ------------------ EDITING STATE ------------------
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({});
   const [imagePreview, setImagePreview] = useState(default_icon);
-
+  const [alert, setAlert] = useState({ visible: false, message: "", type: "" });
   const [originalData, setOriginalData] = useState(null);
+  const navigate = useNavigate();
 
-  // ------------------ FETCH PROFILE ------------------
+  const extractErrorMessage = (err) => {
+    const errors = err.response?.data;
+    if (!errors) return "Something went wrong!";
+    if (errors.non_field_errors) return errors.non_field_errors[0];
+    if (Object.keys(errors).length > 0) return Object.values(errors)[0][0];
+    return "Something went wrong!";
+  };
+
   useEffect(() => {
     const fetchProfile = async () => {
       try {
         const res = await api.get("user/profile/");
         setProfile(res.data);
-
         setFormData({
-          username: res.data.username,
-          phone: res.data.phone,
+          username: res.data.username || "",
+          phone: res.data.phone || "",
           profile_image: null,
         });
-
         setImagePreview(res.data.profile_image || default_icon);
         setOriginalData(res.data);
       } catch (err) {
-        console.error("Profile fetch error:", err);
+        setAlert({
+          visible: true,
+          message: extractErrorMessage(err),
+          type: "error",
+        });
       }
     };
-
     fetchProfile();
   }, []);
 
   if (!profile) return <div className="p-10 text-center">Loading...</div>;
 
-  // ------------------ HANDLE INPUT CHANGE ------------------
   const handleChange = (e) => {
     const { name, value, files } = e.target;
-
-    if (name === "profile_image" && files && files[0]) {
+    if (name === "profile_image" && files?.length) {
       setFormData({ ...formData, profile_image: files[0] });
       setImagePreview(URL.createObjectURL(files[0]));
-    } else {
-      setFormData({ ...formData, [name]: value });
+      return;
     }
+    setFormData({ ...formData, [name]: value });
   };
 
-  // ------------------ EDIT ------------------
-  const handleEdit = () => {
-    setIsEditing(true);
-  };
+  const handleEdit = () => setIsEditing(true);
 
-  // ------------------ CANCEL ------------------
   const handleCancel = () => {
     setFormData({
       username: originalData.username,
       phone: originalData.phone,
       profile_image: null,
     });
-
     setImagePreview(originalData.profile_image || default_icon);
     setIsEditing(false);
   };
+
   const handleSubmit = async () => {
     const body = new FormData();
     body.append("username", formData.username);
     body.append("phone", formData.phone);
-
-    if (formData.profile_image) {
+    if (formData.profile_image)
       body.append("profile_image", formData.profile_image);
-    }
 
     try {
       const res = await api.patch("user/profile/", body, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
-      alert("Profile updated successfully!");
-
-      // Update profile state
+      setAlert({
+        visible: true,
+        message: "Profile updated successfully!",
+        type: "success",
+      });
       setProfile(res.data);
       setOriginalData(res.data);
       setIsEditing(false);
+      setImagePreview(res.data.profile_image || default_icon);
 
-      // ------------------ UPDATE LOCAL STORAGE ------------------
       const storedUser = JSON.parse(localStorage.getItem("user")) || {};
       const updatedUser = { ...storedUser, ...res.data };
       localStorage.setItem("user", JSON.stringify(updatedUser));
     } catch (err) {
       console.error("Update error:", err);
-      alert("Update failed!");
+      setAlert({
+        visible: true,
+        message: extractErrorMessage(err),
+        type: "error",
+      });
     }
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-100 via-purple-100 to-blue-100">
+      {alert.visible && (
+        <div
+          className={`p-4 mb-4 text-center font-semibold ${
+            alert.type === "error"
+              ? "bg-red-300 text-red-900"
+              : "bg-green-300 text-green-900"
+          }`}
+        >
+          {alert.message}
+        </div>
+      )}
+
       <div className="max-w-4xl mx-auto bg-white shadow-xl rounded-2xl p-10 mt-10 mb-20">
         <h1 className="text-3xl font-bold text-gray-800 mb-10">My Profile</h1>
 
-        {/* ------------------ PROFILE IMAGE ------------------ */}
         <div className="flex items-center gap-8 mb-10">
           <img
             src={imagePreview}
             alt="Profile"
             className="w-32 h-32 rounded-full object-cover shadow-lg border-4 border-white"
           />
-
           {isEditing && (
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -127,13 +142,11 @@ const ProfilePage = () => {
           )}
         </div>
 
-        {/* ------------------ FORM ------------------ */}
         <div className="grid md:grid-cols-2 gap-8">
           <div>
             <label className="block text-gray-700 font-medium mb-2">
               Username
             </label>
-
             {isEditing ? (
               <input
                 type="text"
@@ -162,7 +175,6 @@ const ProfilePage = () => {
             <label className="block text-gray-700 font-medium mb-2">
               Phone
             </label>
-
             {isEditing ? (
               <input
                 type="text"
@@ -179,8 +191,10 @@ const ProfilePage = () => {
           </div>
         </div>
 
-        {/* Events */}
-        <div className="mt-10 bg-pink-50 p-6 rounded-xl">
+        <div
+          className="mt-10 bg-pink-50 p-6 rounded-xl cursor-pointer"
+          onClick={() => navigate("/user/dashboard")}
+        >
           <label className="block text-gray-700 font-medium mb-1">
             Events Attended
           </label>
@@ -190,7 +204,6 @@ const ProfilePage = () => {
           </p>
         </div>
 
-        {/* BUTTONS */}
         <div className="mt-12 flex gap-4">
           {!isEditing ? (
             <button

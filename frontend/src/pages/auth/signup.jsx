@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import logo from "../../assets/logo.png";
 import { Link, useNavigate } from "react-router-dom";
 import api from "../../services/api";
+import PopupAlert from "../../components/popupAlert";
 
 const Signup = () => {
   const [username, setUsername] = useState("");
@@ -9,19 +10,40 @@ const Signup = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [phone, setPhone] = useState("");
-  const [message, setMessage] = useState("");
   const navigate = useNavigate();
+
+  const [alert, setAlert] = useState({
+    visible: false,
+    message: "",
+    type: "info",
+  });
+
+  const extractErrorMessage = (err) => {
+    const errors = err.response?.data;
+
+    if (!errors) return "Something went wrong!";
+
+    if (errors.non_field_errors) return errors.non_field_errors[0];
+
+    if (Object.keys(errors).length > 0) return Object.values(errors)[0][0];
+
+    return "Something went wrong!";
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (password !== confirmPassword) {
-      setMessage("Passwords do not match");
+      setAlert({
+        visible: true,
+        message: "Passwords do not match",
+        type: "error",
+      });
       return;
     }
 
     try {
-      await api.post("user/register/", {
+      const response = await api.post("user/register/", {
         username,
         email,
         password,
@@ -29,20 +51,27 @@ const Signup = () => {
         phone,
       });
 
-      setMessage("Signup successful!");
+      setAlert({
+        visible: true,
+        message: response.data.message || "Signup successful!",
+        type: "success",
+      });
 
-      // Clear fields
       setUsername("");
       setEmail("");
       setPassword("");
       setConfirmPassword("");
       setPhone("");
 
-      // Redirect
       setTimeout(() => navigate("/login"), 1000);
     } catch (err) {
-      console.error(err); // Just log error, no formatting
-      setMessage("Something went wrong"); // Simple message
+      console.error("Signup error:", err);
+
+      setAlert({
+        visible: true,
+        message: extractErrorMessage(err),
+        type: "error",
+      });
     }
   };
 
@@ -57,7 +86,14 @@ const Signup = () => {
           Create Your Account
         </h2>
 
-        {message && <p className="text-center mb-4 text-red-400">{message}</p>}
+        {alert.visible && (
+          <PopupAlert
+            message={alert.message}
+            type={alert.type}
+            onClose={() => setAlert({ ...alert, visible: false })}
+            duration={3000}
+          />
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
@@ -115,8 +151,7 @@ const Signup = () => {
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
               className="w-full bg-gray-700 border border-gray-600 rounded-md p-2 text-gray-100"
-              placeholder="Enter phone number "
-              required
+              placeholder="Enter phone number"
             />
           </div>
 

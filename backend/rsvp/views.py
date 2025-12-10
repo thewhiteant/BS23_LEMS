@@ -8,11 +8,8 @@ from events.models import Events
 from .serializer import RSVPSerializer ,InviteTokenSerializer
 from events.serializer import CustomTokenAddedSerializer
 from events.serializer import EventSerializer
-
-
 from django.core.mail import send_mail
-from django.shortcuts import render
-from django.http import HttpResponse
+
 
 class RegisterUserView(APIView):
     permission_classes = [IsAuthenticated]   
@@ -22,9 +19,8 @@ class RegisterUserView(APIView):
         if not event_id:
             return Response({"message": "event_id is required!"}, status=status.HTTP_400_BAD_REQUEST)
         event = get_object_or_404(Events, id=event_id)
-        
-        # Check registration status using the 'user' field, which is the primary unique identifier for logged-in users.
         is_registered = RSVP.objects.filter(event=event, user=request.user).exists()
+        
         return Response({"is_registered": is_registered}, status=status.HTTP_200_OK)
 
     def post(self, request):
@@ -127,13 +123,12 @@ class RegisterPublicView(APIView):
             status="confirmed"
         )
 
-        # Mark invite as used
         invite.is_used = True
         invite.save()
 
         return Response({
             "message": "Registration successful!",
-            "token": str(rsvp.token),  # for cancel later
+            "token": str(rsvp.token),  
         }, status=status.HTTP_201_CREATED)
 
 class CancelRSVPView(APIView):
@@ -186,14 +181,14 @@ class UserDashboardView(APIView):
 
     def get(self, request):
         user = request.user  
-
         reservations = RSVP.objects.filter(user=user).select_related('event')
         events = Events.objects.filter(rsvps__in=reservations).distinct()
-        serializer = CustomTokenAddedSerializer(events, many=True)
-
+        serializer = CustomTokenAddedSerializer(events, many=True,context={'request': request,"user": request.user})
         return Response({
             "events": serializer.data
         }, status=status.HTTP_200_OK)
+
+
 
 class EventRSVPListView(APIView):
     permission_classes = [IsAuthenticated]
@@ -242,15 +237,12 @@ class InviteListView(APIView):
 
     def get(self, request):
         invites = InviteToken.objects.prefetch_related("rsvps__user").select_related("event").all().order_by("-created_at")
-        
-
         expired_param = request.query_params.get("expired")
         if expired_param is not None:
             if expired_param.lower() == "true":
                 invites = [invite for invite in invites if invite.is_expired(hours=12)]
             elif expired_param.lower() == "false":
                 invites = [invite for invite in invites if not invite.is_expired(hours=12)]
-
         serializer = InviteTokenSerializer(invites, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
     

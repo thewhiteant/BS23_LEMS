@@ -2,27 +2,53 @@ import React, { useState } from "react";
 import logo from "../../assets/logo.png";
 import api from "../../services/api";
 import { useNavigate } from "react-router-dom";
+import PopupAlert from "../../components/popupAlert";
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState("");
-  const [message, setMessage] = useState("");
+  const [alert, setAlert] = useState({
+    visible: false,
+    message: "",
+    type: "info",
+  });
   const navigate = useNavigate();
 
   const handleSendEmail = async (e) => {
     e.preventDefault();
     try {
-      await api.post("user/forgot-password/", { email });
-      setMessage("OTP sent to your email if it exists.");
+      const res = await api.post("user/forgot-password/", { email });
 
-      // Navigate to ResetPassword page with hidden email info
-      navigate("/reset", { state: { email } });
-    } catch (err) {
-      setMessage("Something went wrong. Try again.");
+      setAlert({
+        visible: true,
+        message: res.data.message || "OTP sent to your email.",
+        type: "success",
+      });
+
+      setTimeout(() => navigate("/reset", { state: { email } }), 1000);
+    } catch (errors) {
+      const message =
+        (errors?.email && errors.email) ||
+        (errors?.non_field_errors && errors.non_field_errors[0]) ||
+        "Something went wrong. Try again.";
+
+      setAlert({
+        visible: true,
+        message,
+        type: "error",
+      });
     }
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-900">
+      {alert.visible && (
+        <PopupAlert
+          message={alert.message}
+          type={alert.type}
+          onClose={() => setAlert({ ...alert, visible: false })}
+        />
+      )}
+
       <div className="bg-gray-800 p-8 rounded-2xl shadow-lg w-full max-w-md text-gray-200">
         <div className="flex justify-center mb-6">
           <img src={logo} alt="Logo" className="h-25 w-35 object-contain" />
@@ -31,10 +57,6 @@ const ForgotPassword = () => {
         <h2 className="text-2xl font-bold text-center mb-6 text-white">
           Forgot Password
         </h2>
-
-        {message && (
-          <p className="text-center mb-4 text-green-400">{message}</p>
-        )}
 
         <form onSubmit={handleSendEmail} className="space-y-4">
           <div>

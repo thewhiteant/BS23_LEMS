@@ -23,10 +23,13 @@ class InviteToken(models.Model):
 
 
 class RSVP(models.Model):
-    STATUS_CHOICES = [
-        ("confirmed", "Confirmed"),
-        ("cancelled", "Cancelled"),
-    ]
+    class Meta:
+        unique_together = (("event", "user"),) 
+
+
+    class Status(models.TextChoices):
+        CONFIRMED = "confirmed", "Confirmed"
+        CANCELLED = "cancelled", "Cancelled"
 
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -35,11 +38,14 @@ class RSVP(models.Model):
         related_name="rsvps"
     )
 
-    event = models.ForeignKey(Events, on_delete=models.CASCADE, related_name="rsvps")
-    
-    # 🟢 FIX 1: Make guest_email explicitly nullable and 
-    guest_email = models.EmailField(blank=True, null=True) 
+    event = models.ForeignKey(
+        Events, 
+        on_delete=models.CASCADE,
+        related_name="rsvps"
+    )
 
+    guest_email = models.EmailField(blank=True, null=True) 
+    
     invite_token = models.ForeignKey(
         InviteToken,
         on_delete=models.SET_NULL,
@@ -48,14 +54,21 @@ class RSVP(models.Model):
         related_name="rsvps"
     )
 
-    token = models.UUIDField(default=uuid.uuid4, unique=True, editable=False) 
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="confirmed")
+    token = models.UUIDField(
+        default=uuid.uuid4,
+        unique=True,
+        editable=False
+    ) 
+    
+    status = models.CharField(
+        max_length=20,
+        choices=Status.choices,
+        default=Status.CONFIRMED
+    )
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    class Meta:
-        unique_together = (("event", "user"),) 
-
     def __str__(self):
-        # Update display to show the email if user is not set
         return f"{self.user.get_username() if self.user else self.guest_email} → {self.event.title}"
+    

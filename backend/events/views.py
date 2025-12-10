@@ -3,7 +3,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from django.shortcuts import get_object_or_404
-from rest_framework.permissions import AllowAny,IsAuthenticated
+from rest_framework.permissions import IsAuthenticated
 from .serializer import EventSerializer
 from .models import Events
 from django.utils import timezone
@@ -16,7 +16,6 @@ class AllEventsView(APIView):
     def get(self, request):
         now = timezone.now()
 
-        # Filter upcoming events only
         events = Events.objects.filter(date_time__gte=now).order_by('date_time')
 
         serializer = EventSerializer(events, many=True, context={'request': request})

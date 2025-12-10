@@ -8,7 +8,6 @@ const ProfileMenu = () => {
   const user = JSON.parse(localStorage.getItem("user")) || {};
   const username = user.username || "User";
   const profileImage = user.profile_image || default_icon;
-
   const menuRef = useRef(null);
   const navigate = useNavigate();
 

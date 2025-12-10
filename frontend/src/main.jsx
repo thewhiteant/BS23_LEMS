@@ -44,10 +44,9 @@ const router = createBrowserRouter([
   { path: "/login", element: <Login /> },
   { path: "/signup", element: <Signup /> },
   { path: "/forgot", element: <ForgotPassword /> },
-  { path: "/reset", element: <ResetPassword /> }, // no ProtectedRoute
+  { path: "/reset", element: <ResetPassword /> },
   { path: "/invite/:token", element: <InvitePage /> },
 
-  // PRIVATE ROUTES (LOGGED-IN USERS)
   {
     path: "/",
     element: (

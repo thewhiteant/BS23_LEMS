@@ -9,14 +9,12 @@ const api = axios.create({
   },
 });
 
-// Endpoints that don’t require authentication
 const noAuthEndpoints = [
   "user/register/",
   "user/login/",
   "rsvp/guest-register/",
 ];
 
-// Attach access token to requests
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("access");
@@ -31,16 +29,14 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Handle 401 (token expired)
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
+    const refreshToken = localStorage.getItem("refresh");
 
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
-
-      const refreshToken = localStorage.getItem("refresh");
 
       if (!refreshToken) {
         localStorage.removeItem("access");
@@ -51,7 +47,6 @@ api.interceptors.response.use(
       }
 
       try {
-        // Call your refresh endpoint
         const refreshResponse = await axios.post(
           "http://localhost:8000/user/token/refresh/",
           {

@@ -13,7 +13,10 @@ const Dashboard = () => {
 
   const [query, setQuery] = useState("");
   const [locationFilter, setLocationFilter] = useState("all");
-  const [visibleCount, setVisibleCount] = useState(8);
+
+  // PAGINATION STATES
+  const [currentPage, setCurrentPage] = useState(1);
+  const eventsPerPage = 8;
 
   const user = JSON.parse(localStorage.getItem("user"));
 
@@ -50,20 +53,30 @@ const Dashboard = () => {
     });
   }, [events, query, locationFilter]);
 
-  const visibleEvents = filteredEvents.slice(0, visibleCount);
+  // RESET PAGE WHEN FILTER OR SEARCH CHANGES
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [query, locationFilter]);
+
+  // PAGINATION CALCULATION
+  const indexOfLast = currentPage * eventsPerPage;
+  const indexOfFirst = indexOfLast - eventsPerPage;
+  const currentEvents = filteredEvents.slice(indexOfFirst, indexOfLast);
+
+  const totalPages = Math.ceil(filteredEvents.length / eventsPerPage);
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-white to-gray-50">
       {/* Hero Slider */}
       <HeroSlider events={events.length > 0 ? events : undefined} />
 
-      {/* Floating Profile/Admin Menu (Top Right, Hover Over Slider) */}
+      {/* Floating Profile/Admin Menu */}
       <div className="fixed top-4 right-4 z-[9999]">
         {user?.is_staff ? <AdminMenu /> : <ProfileMenu />}
       </div>
 
       <main className="m-10 p-[10px]">
-        {/* Header Title Only */}
+        {/* Header */}
         <div className="mb-6">
           <h1 className="text-cherry font-extrabold text-3xl sm:text-4xl md:text-5xl leading-tight">
             All Events
@@ -73,11 +86,8 @@ const Dashboard = () => {
           </p>
         </div>
 
-        {/* Search & Filters */}
-        <section
-          aria-label="Search and filters"
-          className="bg-white/60 backdrop-blur-sm rounded-xl p-4 sm:p-6 mb-8 shadow-sm"
-        >
+        {/* Search & Filter */}
+        <section className="bg-white/60 backdrop-blur-sm rounded-xl p-4 sm:p-6 mb-8 shadow-sm">
           <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
             <input
               value={query}
@@ -108,8 +118,8 @@ const Dashboard = () => {
           </div>
         </section>
 
-        {/* Events List */}
-        <section aria-label="Events list">
+        {/* Events */}
+        <section>
           {loading ? (
             <div className="py-12 text-center text-gray-500">
               Loading events...
@@ -119,22 +129,58 @@ const Dashboard = () => {
               No events found.
             </div>
           ) : (
-            <div className="grid grid-cols-[repeat(auto-fit,minmax(320px,1fr))] gap-6">
-              {visibleEvents.map((ev) => (
-                <EventCard key={ev.id} event={ev} />
-              ))}
-            </div>
-          )}
+            <>
+              {/* Events list */}
+              <div className="grid grid-cols-[repeat(auto-fit,minmax(320px,1fr))] gap-6">
+                {currentEvents.map((ev) => (
+                  <EventCard key={ev.id} event={ev} />
+                ))}
+              </div>
 
-          {visibleCount < filteredEvents.length && (
-            <div className="mt-8 flex justify-center">
-              <button
-                onClick={() => setVisibleCount((v) => v + 8)}
-                className="px-5 py-3 bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition"
-              >
-                Load more
-              </button>
-            </div>
+              {/* Pagination */}
+              <div className="mt-10 flex justify-center gap-2 flex-wrap">
+                {/* Prev */}
+                <button
+                  onClick={() => setCurrentPage((p) => p - 1)}
+                  disabled={currentPage === 1}
+                  className={`px-4 py-2 rounded-lg border ${
+                    currentPage === 1
+                      ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                      : "bg-white text-gray-700 hover:bg-gray-100"
+                  }`}
+                >
+                  ◀ Prev
+                </button>
+
+                {/* Page numbers */}
+                {[...Array(totalPages)].map((_, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setCurrentPage(i + 1)}
+                    className={`px-4 py-2 rounded-lg border ${
+                      currentPage === i + 1
+                        ? "bg-cherry text-white"
+                        : "bg-white hover:bg-gray-100"
+                    }`}
+                  >
+                    {i + 1}
+                  </button>
+                ))}
+
+                {/* Next */}
+                <button
+                  onClick={() => setCurrentPage((p) => p + 1)}
+                  disabled={currentPage === totalPages}
+                  className={`px-4 py-2 rounded-lg border ${
+                    currentPage === totalPages
+                      ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                      : "bg-white text-gray-700 hover:bg-gray-100"
+                  }`}
+                >
+                  Next ▶
+                </button>
+              </div>
+            </>
           )}
         </section>
       </main>

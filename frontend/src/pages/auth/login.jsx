@@ -1,45 +1,50 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import api from "../../services/api";
 import logo from "../../assets/logo.png";
-import { Link } from "react-router-dom";
+import PopupAlert from "../../components/popupAlert";
 
 const Login = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [message, setMessage] = useState("");
   const navigate = useNavigate();
+  const [alert, setAlert] = useState({
+    visible: false,
+    message: "",
+    type: "info",
+  });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setMessage("");
+    setAlert({ visible: false, message: "", type: "info" });
 
     try {
-      const response = await api.post("user/login/", {
-        username,
-        password,
-      });
-
+      const response = await api.post("user/login/", { username, password });
       const { access, refresh, user } = response.data;
 
-      // Save both tokens in localStorage
       localStorage.setItem("access", access);
       localStorage.setItem("refresh", refresh);
+      if (user) localStorage.setItem("user", JSON.stringify(user));
 
-      // Save user data
-      if (user) {
-        localStorage.setItem("user", JSON.stringify(user));
-      }
+      setAlert({
+        visible: true,
+        message: "Login successful!",
+        type: "success",
+      });
 
-      setMessage("Login successful!");
-      navigate("/");
+      setTimeout(() => {
+        navigate("/");
+      }, 1000);
     } catch (error) {
       console.error("Login error:", error.response?.data);
-      setMessage(
-        error.response?.data?.detail ||
-          error.response?.data?.message ||
-          "Invalid username or password."
-      );
+
+      setAlert({
+        visible: true,
+        message:
+          error.response?.data?.non_field_errors?.[0] ||
+          "Invalid username or password.",
+        type: "error",
+      });
     }
   };
 
@@ -52,7 +57,16 @@ const Login = () => {
         <h2 className="text-2xl font-bold text-center mb-6 text-white">
           Login to Your Account
         </h2>
-        {message && <p className="text-center mb-4 text-red-400">{message}</p>}
+
+        {alert.visible && (
+          <PopupAlert
+            message={alert.message}
+            type={alert.type}
+            onClose={() => setAlert({ ...alert, visible: false })}
+            duration={3000}
+          />
+        )}
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-gray-300 mb-1">Username</label>
@@ -83,6 +97,7 @@ const Login = () => {
             Login
           </button>
         </form>
+
         <p className="text-sm text-gray-400 text-center mt-4">
           Don't have an account?{" "}
           <Link to="/signup" className="text-blue-500 hover:underline">
