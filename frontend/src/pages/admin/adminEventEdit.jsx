@@ -23,7 +23,6 @@ const AdminEventEdit = () => {
 
   const [imagePreview, setImagePreview] = useState(logo);
 
-  // ✅ FETCH SINGLE EVENT BY ID (FIXED)
   useEffect(() => {
     const fetchSingleEvent = async () => {
       try {
@@ -88,7 +87,7 @@ const AdminEventEdit = () => {
     try {
       const res = await api.put(`event/update/${id}/`, body, {
         headers: {
-          "Content-Type": "multipart/form-data", // ✅ THIS FIXES IMAGE UPLOAD
+          "Content-Type": "multipart/form-data",
         },
       });
 
@@ -134,7 +133,6 @@ const AdminEventEdit = () => {
           />
         </div>
 
-        {/* ✅ FORM FIELDS */}
         <div className="grid md:grid-cols-2 gap-8">
           {/* TITLE */}
           <div className="md:col-span-2">
@@ -151,7 +149,6 @@ const AdminEventEdit = () => {
             />
           </div>
 
-          {/* DATE */}
           <div>
             <label className="block text-gray-700 font-medium mb-2">Date</label>
             <input
@@ -164,7 +161,6 @@ const AdminEventEdit = () => {
             />
           </div>
 
-          {/* TIME */}
           <div>
             <label className="block text-gray-700 font-medium mb-2">Time</label>
             <input
@@ -177,7 +173,6 @@ const AdminEventEdit = () => {
             />
           </div>
 
-          {/* LOCATION */}
           <div className="md:col-span-2">
             <label className="block text-gray-700 font-medium mb-2">
               Location
@@ -192,7 +187,6 @@ const AdminEventEdit = () => {
             />
           </div>
 
-          {/* DESCRIPTION */}
           <div className="md:col-span-2">
             <label className="block text-gray-700 font-medium mb-2">
               Description
@@ -208,7 +202,6 @@ const AdminEventEdit = () => {
           </div>
         </div>
 
-        {/* ✅ BUTTONS */}
         <div className="mt-12 flex gap-4">
           <button
             onClick={handleSubmit}

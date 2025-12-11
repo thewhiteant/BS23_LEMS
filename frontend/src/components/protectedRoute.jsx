@@ -11,7 +11,7 @@ const ProtectedRoute = ({ children, adminOnly = false }) => {
   useEffect(() => {
     const checkAdmin = async () => {
       try {
-        const res = await api.get("user/is-admin/"); // ✅ MATCHES YOUR URL
+        const res = await api.get("user/is-admin/");
         setIsAdmin(res.data.is_admin);
       } catch (err) {
         console.error("Admin check failed", err);
@@ -21,7 +21,6 @@ const ProtectedRoute = ({ children, adminOnly = false }) => {
       }
     };
 
-    // ✅ Only check admin if user is logged in
     if (token) {
       checkAdmin();
     } else {
@@ -29,12 +28,10 @@ const ProtectedRoute = ({ children, adminOnly = false }) => {
     }
   }, [token]);
 
-  // 🚫 Not logged in → login
   if (!token && !loading) {
     return <Navigate to="/login" replace />;
   }
 
-  // ⏳ Loading state while checking role
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center text-xl">
@@ -43,12 +40,10 @@ const ProtectedRoute = ({ children, adminOnly = false }) => {
     );
   }
 
-  // 🚫 User trying to access admin → redirect to "/"
   if (adminOnly && !isAdmin) {
     return <Navigate to="/" replace />;
   }
 
-  // ✅ Allowed
   return children;
 };
 

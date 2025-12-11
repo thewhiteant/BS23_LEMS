@@ -17,24 +17,19 @@ const EventCard = ({ event }) => {
         lg:max-w-[400px]   /* wider on desktops */
       "
     >
-      {/* Event Image */}
       <img
         src={event_cover}
         alt={title}
         className="w-full h-48 object-cover rounded-t-xl"
       />
 
-      {/* Event Content */}
       <div className="p-4 flex flex-col gap-3">
-        {/* Title */}
         <h2 className="text-xl md:text-2xl font-bold text-gray-800">{title}</h2>
 
-        {/* Description */}
         <p className="text-gray-600 text-sm md:text-base line-clamp-3">
           {desc}
         </p>
 
-        {/* Time & Location */}
         <div className="mt-2 flex flex-col gap-1 text-gray-500 text-sm">
           <span>
             <strong>Time:</strong> {date_time}

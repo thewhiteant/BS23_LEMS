@@ -3,6 +3,7 @@ import AdminMenu from "../../components/adminMenu";
 import Footer from "../../components/footer";
 import api from "../../services/api";
 import { useNavigate } from "react-router-dom";
+import PopupAlert from "../../components/popupAlert";
 
 const AdminEventInvite = () => {
   const [events, setEvents] = useState([]);
@@ -13,25 +14,29 @@ const AdminEventInvite = () => {
   const [loading, setLoading] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [popup, setPopup] = useState({
+    message: "",
+    type: "info",
+    visible: false,
+  });
   const navigate = useNavigate();
 
   const dropdownRef = useRef();
 
-  // ✅ LOAD ALL EVENTS
   useEffect(() => {
     const fetchEvents = async () => {
       try {
         const res = await api.get("event/all/");
         setEvents(res.data);
-        setFilteredEvents(res.data); // initially show all
+        setFilteredEvents(res.data);
       } catch (err) {
         console.error("Error loading events:", err);
+        showPopup("Error loading events", "error");
       }
     };
     fetchEvents();
   }, []);
 
-  // Close dropdown on outside click
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
@@ -42,16 +47,19 @@ const AdminEventInvite = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Filter events as user types
   useEffect(() => {
     const filtered = events.filter((event) =>
       event.title.toLowerCase().includes(searchTerm.toLowerCase())
     );
-    setFilteredEvents(filtered.slice(0, 50)); // show max 50 suggestions
+    setFilteredEvents(filtered.slice(0, 50));
   }, [searchTerm, events]);
 
+  const showPopup = (message, type = "info") => {
+    setPopup({ message, type, visible: true });
+  };
+
   const generateInvite = async () => {
-    if (!selectedEvent) return alert("Please select an event.");
+    if (!selectedEvent) return showPopup("Please select an event.", "warning");
 
     setLoading(true);
     try {
@@ -64,15 +72,17 @@ const AdminEventInvite = () => {
       const frontendLink = `${window.location.origin}/invite/${token}`;
 
       setInviteLink(frontendLink);
+      showPopup("Invite link generated!", "success");
     } catch {
-      alert("Failed to generate invite.");
+      showPopup("Failed to generate invite.", "error");
     }
     setLoading(false);
   };
 
   const shareViaGmail = async () => {
-    if (!email) return alert("Please enter guest email.");
-    if (!inviteLink) return alert("Please generate the invite link first.");
+    if (!email) return showPopup("Please enter guest email.", "warning");
+    if (!inviteLink)
+      return showPopup("Please generate the invite link first.", "warning");
 
     try {
       const res = await api.post("rsvp/send-mail/", {
@@ -82,14 +92,14 @@ const AdminEventInvite = () => {
       });
 
       if (res.data.status === "success") {
-        alert("Email sent! Check console.");
-        setEmail(""); // clear input
+        showPopup("Email sent successfully!", "success");
+        setEmail("");
       } else {
-        alert("Failed to send email.");
+        showPopup("Failed to send email.", "error");
       }
     } catch (err) {
       console.error(err);
-      alert("Error sending email.");
+      showPopup("Error sending email.", "error");
     }
   };
 
@@ -104,7 +114,6 @@ const AdminEventInvite = () => {
           Event Invite System
         </h1>
 
-        {/* ✅ SEARCHABLE DROPDOWN */}
         <div className="mb-4 relative" ref={dropdownRef}>
           <input
             type="text"
@@ -145,17 +154,13 @@ const AdminEventInvite = () => {
           )}
         </div>
 
-        {/* ✅ GENERATE LINK BUTTON */}
         <button
           onClick={generateInvite}
-          className="w-full px-8 py-4 bg-gradient-to-r from-red-500 to-pink-600 
-                     text-white font-bold text-lg rounded-xl hover:scale-105 
-                     transition shadow-lg"
+          className="w-full px-8 py-4 bg-gradient-to-r from-red-500 to-pink-600 text-white font-bold text-lg rounded-xl hover:scale-105 transition shadow-lg"
         >
           {loading ? "Generating..." : "Generate Invite Link"}
         </button>
 
-        {/* ✅ INVITE LINK PANEL */}
         {inviteLink && (
           <div className="mt-6 p-4 bg-gray-50 border rounded-xl space-y-3">
             <p className="font-semibold text-gray-600">Invite Link:</p>
@@ -165,7 +170,6 @@ const AdminEventInvite = () => {
             </p>
 
             <div className="flex flex-col gap-3">
-              {/* COPY LINK */}
               <button
                 onClick={() => navigator.clipboard.writeText(inviteLink)}
                 className="w-full px-6 py-3 bg-gray-800 text-white rounded-xl hover:scale-105 transition shadow"
@@ -173,7 +177,6 @@ const AdminEventInvite = () => {
                 🔗 Copy Link
               </button>
 
-              {/* EMAIL INPUT */}
               <input
                 type="email"
                 placeholder="Guest Email"
@@ -182,7 +185,6 @@ const AdminEventInvite = () => {
                 className="w-full border p-3 rounded-xl"
               />
 
-              {/* SHARE VIA GMAIL */}
               <button
                 onClick={shareViaGmail}
                 className="w-full px-6 py-3 bg-red-500 text-white rounded-xl hover:scale-105 transition shadow"
@@ -196,14 +198,11 @@ const AdminEventInvite = () => {
 
       <Footer />
 
-      {/* Floating Invite Management Button */}
       <button
         onClick={() => navigate("/admin/invite-management")}
-        className="fixed bottom-6 right-6 flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 
-             text-white font-semibold rounded-full shadow-2xl hover:scale-110 hover:shadow-blue-400/50 transition-transform duration-300"
+        className="fixed bottom-6 right-6 flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-semibold rounded-full shadow-2xl hover:scale-110 hover:shadow-blue-400/50 transition-transform duration-300"
         title="Manage all generated invites"
       >
-        {/* Optional icon */}
         <svg
           xmlns="http://www.w3.org/2000/svg"
           className="h-6 w-5"
@@ -220,6 +219,14 @@ const AdminEventInvite = () => {
         </svg>
         Manage Invites
       </button>
+
+      {popup.visible && (
+        <PopupAlert
+          message={popup.message}
+          type={popup.type}
+          onClose={() => setPopup({ ...popup, visible: false })}
+        />
+      )}
     </div>
   );
 };

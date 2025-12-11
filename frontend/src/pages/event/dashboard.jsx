@@ -10,17 +10,12 @@ import AdminMenu from "../../components/adminMenu";
 const Dashboard = () => {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
-
   const [query, setQuery] = useState("");
   const [locationFilter, setLocationFilter] = useState("all");
-
-  // PAGINATION STATES
   const [currentPage, setCurrentPage] = useState(1);
-  const eventsPerPage = 8;
-
+  const eventsPerPage = 10;
   const user = JSON.parse(localStorage.getItem("user"));
 
-  // Fetch events
   useEffect(() => {
     const fetchEvents = async () => {
       try {
@@ -35,7 +30,6 @@ const Dashboard = () => {
     fetchEvents();
   }, []);
 
-  // Filter events
   const filteredEvents = useMemo(() => {
     const q = query.trim().toLowerCase();
     return events.filter((ev) => {
@@ -53,30 +47,24 @@ const Dashboard = () => {
     });
   }, [events, query, locationFilter]);
 
-  // RESET PAGE WHEN FILTER OR SEARCH CHANGES
   useEffect(() => {
     setCurrentPage(1);
   }, [query, locationFilter]);
 
-  // PAGINATION CALCULATION
   const indexOfLast = currentPage * eventsPerPage;
   const indexOfFirst = indexOfLast - eventsPerPage;
   const currentEvents = filteredEvents.slice(indexOfFirst, indexOfLast);
-
   const totalPages = Math.ceil(filteredEvents.length / eventsPerPage);
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-white to-gray-50">
-      {/* Hero Slider */}
       <HeroSlider events={events.length > 0 ? events : undefined} />
 
-      {/* Floating Profile/Admin Menu */}
       <div className="fixed top-4 right-4 z-[9999]">
         {user?.is_staff ? <AdminMenu /> : <ProfileMenu />}
       </div>
 
       <main className="m-10 p-[10px]">
-        {/* Header */}
         <div className="mb-6">
           <h1 className="text-cherry font-extrabold text-3xl sm:text-4xl md:text-5xl leading-tight">
             All Events
@@ -86,7 +74,6 @@ const Dashboard = () => {
           </p>
         </div>
 
-        {/* Search & Filter */}
         <section className="bg-white/60 backdrop-blur-sm rounded-xl p-4 sm:p-6 mb-8 shadow-sm">
           <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
             <input
@@ -118,7 +105,6 @@ const Dashboard = () => {
           </div>
         </section>
 
-        {/* Events */}
         <section>
           {loading ? (
             <div className="py-12 text-center text-gray-500">
@@ -130,16 +116,13 @@ const Dashboard = () => {
             </div>
           ) : (
             <>
-              {/* Events list */}
               <div className="grid grid-cols-[repeat(auto-fit,minmax(320px,1fr))] gap-6">
                 {currentEvents.map((ev) => (
                   <EventCard key={ev.id} event={ev} />
                 ))}
               </div>
 
-              {/* Pagination */}
               <div className="mt-10 flex justify-center gap-2 flex-wrap">
-                {/* Prev */}
                 <button
                   onClick={() => setCurrentPage((p) => p - 1)}
                   disabled={currentPage === 1}
@@ -152,7 +135,6 @@ const Dashboard = () => {
                   ◀ Prev
                 </button>
 
-                {/* Page numbers */}
                 {[...Array(totalPages)].map((_, i) => (
                   <button
                     key={i}
@@ -167,7 +149,6 @@ const Dashboard = () => {
                   </button>
                 ))}
 
-                {/* Next */}
                 <button
                   onClick={() => setCurrentPage((p) => p + 1)}
                   disabled={currentPage === totalPages}

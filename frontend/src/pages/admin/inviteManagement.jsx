@@ -7,7 +7,6 @@ const InviteManagement = () => {
   const [invites, setInvites] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  // Fetch invites
   const fetchInvites = async () => {
     setLoading(true);
     try {
@@ -20,7 +19,6 @@ const InviteManagement = () => {
     setLoading(false);
   };
 
-  // Delete invite
   const deleteInvite = async (id) => {
     if (!window.confirm("Are you sure you want to delete this invite?")) return;
     try {
@@ -32,7 +30,6 @@ const InviteManagement = () => {
     }
   };
 
-  // Expire invite
   const expireInvite = async (id) => {
     if (!window.confirm("Are you sure you want to expire this invite?")) return;
     try {

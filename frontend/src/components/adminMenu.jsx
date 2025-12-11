@@ -24,7 +24,6 @@ const AdminMenu = () => {
 
   return (
     <div className="relative" ref={menuRef}>
-      {/* TOP BUTTON */}
       <div
         onClick={() => setOpen(!open)}
         className="flex items-center gap-3 cursor-pointer 
@@ -41,7 +40,6 @@ const AdminMenu = () => {
         <span className="text-gray-500 text-xs">▼</span>
       </div>
 
-      {/* DROPDOWN */}
       {open && (
         <div
           className="
@@ -86,7 +84,6 @@ const AdminMenu = () => {
 
           <div className="border-t my-2"></div>
 
-          {/* USER OPTIONS */}
           <button
             onClick={() => navigate("/user/dashboard")}
             className="w-full text-left px-5 py-2 hover:bg-gray-100 transition"

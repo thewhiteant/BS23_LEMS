@@ -5,7 +5,6 @@ import EventCard from "../../components/eventLongCard";
 import api from "../../services/api";
 import { useEffect } from "react";
 
-// ---------------- ADMIN DASHBOARD ---------------- //
 const AdminDashboard = () => {
   const [events, setEvents] = useState([]);
 
@@ -53,7 +52,6 @@ const AdminDashboard = () => {
           Admin Dashboard
         </h1>
 
-        {/* Upcoming Events */}
         <section className="mb-12">
           <h2 className="text-2xl font-semibold text-gray-800 mb-4">
             Upcoming Events
@@ -75,7 +73,6 @@ const AdminDashboard = () => {
           )}
         </section>
 
-        {/* Past Events */}
         <section className="mb-20">
           <h2 className="text-2xl font-semibold text-gray-800 mb-4">
             Past Events

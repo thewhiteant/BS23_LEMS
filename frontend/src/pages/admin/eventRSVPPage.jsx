@@ -5,18 +5,17 @@ import api from "../../services/api";
 import Footer from "../../components/footer";
 
 const EventRSVPPage = () => {
-  const { id } = useParams(); // event ID from route
+  const { id } = useParams();
   const [rsvps, setRsvps] = useState([]);
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
 
-  // Fetch RSVPs for this event
   useEffect(() => {
     const fetchRSVPs = async () => {
       try {
         const res = await api.get(`rsvp/list?event_id=${id}`);
-        setRsvps(res.data); // expected response: [{user: {...}, guest_email:..., status:...}]
+        setRsvps(res.data);
       } catch (err) {
         console.error("Error loading RSVPs:", err);
       } finally {
@@ -26,7 +25,6 @@ const EventRSVPPage = () => {
     fetchRSVPs();
   }, [id]);
 
-  // Filter RSVPs by search query and status
   const filteredRSVPs = useMemo(() => {
     const q = query.trim().toLowerCase();
     return rsvps.filter((rsvp) => {
@@ -45,11 +43,9 @@ const EventRSVPPage = () => {
     });
   }, [rsvps, query, statusFilter]);
 
-  // ---------------- CSV Download Function ----------------
   const downloadCSV = () => {
     if (!rsvps || rsvps.length === 0) return;
 
-    // Define CSV headers
     const headers = [
       "Full Name",
       "Email Address",
@@ -58,24 +54,21 @@ const EventRSVPPage = () => {
       "Token",
     ];
 
-    // Map RSVP data to CSV rows
-    const rows = rsvps.map((rsvp) => [
-      rsvp.user
-        ? `${rsvp.user.first_name} ${rsvp.user.last_name}`.trim() ||
+    const rows = rsvps.map((rsvp) => {
+      const fullName = rsvp.user
+        ? `${rsvp.user.first_name || ""} ${rsvp.user.last_name || ""}`.trim() ||
           rsvp.user.username
-        : "Guest",
-      rsvp.user?.email || rsvp.guest_email,
-      rsvp.user ? "Registered" : "Guest",
-      rsvp.status.charAt(0).toUpperCase() + rsvp.status.slice(1),
-      rsvp.token,
-      downloadCSV,
-    ]);
+        : "Guest";
+      const email = rsvp.user?.email || rsvp.guest_email || "";
+      const userType = rsvp.user ? "Registered" : "Guest";
+      const status = rsvp.status.charAt(0).toUpperCase() + rsvp.status.slice(1);
+      return [fullName, email, userType, status, rsvp.token];
+    });
 
     const csvContent = [headers, ...rows]
       .map((row) => row.map((v) => `"${v}"`).join(","))
       .join("\n");
 
-    // Create a blob and trigger download
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
@@ -91,7 +84,6 @@ const EventRSVPPage = () => {
       <main className="flex-1 m-10">
         <h1 className="text-3xl font-bold text-cherry mb-4">Event RSVPs</h1>
 
-        {/* Filters */}
         <div className="flex flex-col sm:flex-row gap-3 items-center mb-6">
           <input
             type="text"
@@ -126,7 +118,6 @@ const EventRSVPPage = () => {
           </button>
         </div>
 
-        {/* RSVP List */}
         {loading ? (
           <div className="text-center py-12 text-gray-500">
             Loading RSVPs...

@@ -23,7 +23,6 @@ const ProfileMenu = () => {
 
   return (
     <div className="relative" ref={menuRef}>
-      {/* TOP BUTTON */}
       <div
         onClick={() => setOpen(!open)}
         className="flex items-center gap-3 cursor-pointer 
@@ -40,7 +39,6 @@ const ProfileMenu = () => {
         <span className="text-gray-500 text-xs">▼</span>
       </div>
 
-      {/* DROPDOWN */}
       {open && (
         <div
           className="

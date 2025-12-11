@@ -5,7 +5,6 @@ const Footer = () => {
     <footer className="mt-auto bg-gray-900 text-gray-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
-          {/* About */}
           <div>
             <h3 className="text-white font-bold text-lg mb-3">YourBrand</h3>
             <p className="text-sm text-gray-400">
@@ -17,7 +16,6 @@ const Footer = () => {
             </p>
           </div>
 
-          {/* Explore */}
           <div>
             <h4 className="text-white font-semibold mb-3">Explore</h4>
             <ul className="text-sm space-y-2 text-gray-400">
@@ -39,7 +37,6 @@ const Footer = () => {
             </ul>
           </div>
 
-          {/* Support */}
           <div>
             <h4 className="text-white font-semibold mb-3">Support</h4>
             <ul className="text-sm space-y-2 text-gray-400">
@@ -61,7 +58,6 @@ const Footer = () => {
             </ul>
           </div>
 
-          {/* Newsletter / Social */}
           <div>
             <h4 className="text-white font-semibold mb-3">Stay updated</h4>
             <p className="text-sm text-gray-400 mb-3">
@@ -70,7 +66,7 @@ const Footer = () => {
             <form
               onSubmit={(e) => {
                 e.preventDefault();
-                // placeholder: wire this to your newsletter API
+
                 alert("Thanks! (connect this form to your API)");
               }}
               className="flex gap-2"

@@ -6,7 +6,6 @@ import cover2 from "../assets/images/cover2.jpg";
 import cover3 from "../assets/images/cover3.jpg";
 
 const HeroSlider = ({ events = [] }) => {
-  // Predefined fallback slides
   const defaultSlides = [
     {
       img: cover,
@@ -30,11 +29,10 @@ const HeroSlider = ({ events = [] }) => {
     },
   ];
 
-  // If events exist, map them to slides
   const slides =
     events.length > 0
       ? events.map((event) => ({
-          img: event.event_cover, // full URL from backend
+          img: event.event_cover,
           title: event.title,
           subtitle:
             event.desc.length > 100
@@ -54,7 +52,6 @@ const HeroSlider = ({ events = [] }) => {
 
   return (
     <div className="relative w-full overflow-hidden h-[60vh] md:h-[60vh] lg:h-[65vh]">
-      {/* Slider */}
       <div
         className="flex transition-transform duration-[1200ms] ease-out h-full"
         style={{ transform: `translateX(-${index * 100}%)` }}
@@ -84,7 +81,6 @@ const HeroSlider = ({ events = [] }) => {
         ))}
       </div>
 
-      {/* Dots */}
       <div className="absolute bottom-5 left-1/2 -translate-x-1/2 flex gap-3">
         {slides.map((_, i) => (
           <div

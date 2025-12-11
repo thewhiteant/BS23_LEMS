@@ -18,7 +18,6 @@ const AdminCreateEvent = () => {
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  // Popup alert state
   const [alert, setAlert] = useState({
     visible: false,
     message: "",
@@ -86,7 +85,6 @@ const AdminCreateEvent = () => {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      {/* Popup Alert */}
       {alert.visible && (
         <PopupAlert
           message={alert.message}
@@ -115,7 +113,6 @@ const AdminCreateEvent = () => {
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Event Title */}
             <div>
               <label className="block text-gray-700 font-medium mb-2">
                 Event Title
@@ -130,7 +127,6 @@ const AdminCreateEvent = () => {
               />
             </div>
 
-            {/* Description */}
             <div>
               <label className="block text-gray-700 font-medium mb-2">
                 Description
@@ -145,7 +141,6 @@ const AdminCreateEvent = () => {
               />
             </div>
 
-            {/* Date & Time */}
             <div>
               <label className="block text-gray-700 font-medium mb-2">
                 Date & Time
@@ -160,7 +155,6 @@ const AdminCreateEvent = () => {
               />
             </div>
 
-            {/* Location */}
             <div>
               <label className="block text-gray-700 font-medium mb-2">
                 Location
@@ -175,7 +169,6 @@ const AdminCreateEvent = () => {
               />
             </div>
 
-            {/* Max Attendees */}
             <div>
               <label className="block text-gray-700 font-medium mb-2">
                 Max Attendees
@@ -190,7 +183,6 @@ const AdminCreateEvent = () => {
               />
             </div>
 
-            {/* Price */}
             <div>
               <label className="block text-gray-700 font-medium mb-2">
                 Price (Optional)
@@ -204,7 +196,6 @@ const AdminCreateEvent = () => {
               />
             </div>
 
-            {/* Event Cover */}
             <div>
               <label className="block text-gray-700 font-medium mb-2">
                 Event Cover
@@ -225,7 +216,6 @@ const AdminCreateEvent = () => {
               )}
             </div>
 
-            {/* Submit Button */}
             <div>
               <button
                 type="submit"

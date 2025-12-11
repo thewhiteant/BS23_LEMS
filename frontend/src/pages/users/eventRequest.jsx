@@ -14,8 +14,6 @@ const UserEventRequestPage = () => {
 
   const [imagePreview, setImagePreview] = useState(null);
   const [submitted, setSubmitted] = useState(false);
-
-  // ---------------- HANDLE INPUT ---------------- //
   const handleChange = (e) => {
     const { name, value, files } = e.target;
 
@@ -27,7 +25,6 @@ const UserEventRequestPage = () => {
     }
   };
 
-  // ---------------- HANDLE SUBMIT ---------------- //
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -37,7 +34,6 @@ const UserEventRequestPage = () => {
     }
 
     try {
-      // Placeholder: Replace with your API endpoint
       const res = await fetch("/api/user/event-request/", {
         method: "POST",
         body,
@@ -78,7 +74,6 @@ const UserEventRequestPage = () => {
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Event Title */}
             <div>
               <label className="block text-gray-700 font-medium mb-2">
                 Event Title
@@ -93,7 +88,6 @@ const UserEventRequestPage = () => {
               />
             </div>
 
-            {/* Event Description */}
             <div>
               <label className="block text-gray-700 font-medium mb-2">
                 Description
@@ -108,7 +102,6 @@ const UserEventRequestPage = () => {
               />
             </div>
 
-            {/* Date & Time */}
             <div>
               <label className="block text-gray-700 font-medium mb-2">
                 Date & Time
@@ -123,7 +116,6 @@ const UserEventRequestPage = () => {
               />
             </div>
 
-            {/* Location */}
             <div>
               <label className="block text-gray-700 font-medium mb-2">
                 Location
@@ -138,7 +130,6 @@ const UserEventRequestPage = () => {
               />
             </div>
 
-            {/* Max Attendees */}
             <div>
               <label className="block text-gray-700 font-medium mb-2">
                 Max Attendees
@@ -153,7 +144,6 @@ const UserEventRequestPage = () => {
               />
             </div>
 
-            {/* Event Cover */}
             <div>
               <label className="block text-gray-700 font-medium mb-2">
                 Event Cover
@@ -174,7 +164,6 @@ const UserEventRequestPage = () => {
               )}
             </div>
 
-            {/* Submit */}
             <div>
               <button
                 type="submit"

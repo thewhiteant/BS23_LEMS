@@ -15,8 +15,8 @@ from .serializer import (
 )
 from events.serializer import CustomTokenAddedSerializer
 from events.serializer import EventSerializer
-from django.core.mail import send_mail
 from config.constans import ResponseMessages
+from users.tasks import send_mail_x
 
 
 class UserDashboardView(APIView):
@@ -166,16 +166,11 @@ class SendEmailAPIView(APIView):
             subject = request.data.get("subject", "Hello from Django APIView")
             message = request.data.get("message", "This is a test email from React.")
 
-            send_mail(
-                subject,
-                message,
-                None,
-                [recipient],
-                fail_silently=False,
-            )
+            # Call Celery task asynchronously
+            send_mail_x.delay(subject, message, recipient)
 
             return Response(
-                {"status": "success", "message": "Email sent! Check console."},
+                {"status": "success", "message": "Email queued for sending!"},
                 status=status.HTTP_200_OK,
             )
 

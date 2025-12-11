@@ -2,37 +2,29 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 
-import App from "./App";
-
-// Auth Pages
 import Login from "./pages/auth/login";
 import Signup from "./pages/auth/signup";
 import ForgotPassword from "./pages/auth/forgatePassowrd";
 import ResetPassword from "./pages/auth/resetPassword";
 
-// User Pages
 import InvitePage from "./pages/users/invitePage";
 import ProfilePage from "./pages/users/profile";
 import UserDashboard from "./pages/users/dashboard";
 import UserEventRequestPage from "./pages/users/eventRequest";
 
-// Admin Pages
 import AdminDashboard from "./pages/admin/adminDashboard";
 import AdminCreateEvent from "./pages/admin/adminEventCreate";
 import AdminEventEdit from "./pages/admin/adminEventEdit";
 import AdminEventInvite from "./pages/admin/adminEventInvite";
 import EventRSVPPage from "./pages/admin/eventRSVPPage";
 
-// Event Pages
 import Dashbord from "./pages/event/dashboard";
 import EventPage from "./pages/event/eventPage";
 
-// Components
 import ProtectedRoute from "./components/protectedRoute";
 import Logout from "./components/logout";
 import InviteManagement from "./pages/admin/inviteManagement";
 
-// Unauthorized Page
 const Unauthorized = () => (
   <div className="min-h-screen flex items-center justify-center text-2xl text-red-600">
     🚫 Admin Access Only
@@ -40,7 +32,6 @@ const Unauthorized = () => (
 );
 
 const router = createBrowserRouter([
-  // PUBLIC ROUTES
   { path: "/login", element: <Login /> },
   { path: "/signup", element: <Signup /> },
   { path: "/forgot", element: <ForgotPassword /> },
@@ -88,7 +79,6 @@ const router = createBrowserRouter([
     ),
   },
 
-  // ADMIN ROUTES
   {
     path: "/admin/dashboard",
     element: (
@@ -140,7 +130,6 @@ const router = createBrowserRouter([
     ),
   },
 
-  // LOGOUT
   {
     path: "/logout",
     element: (
@@ -150,10 +139,8 @@ const router = createBrowserRouter([
     ),
   },
 
-  // UNAUTHORIZED
   { path: "/unauthorized", element: <Unauthorized /> },
 
-  // 404 PAGE
   {
     path: "*",
     element: (

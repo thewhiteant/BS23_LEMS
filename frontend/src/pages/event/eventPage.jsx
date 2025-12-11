@@ -13,14 +13,12 @@ const EventPage = () => {
   const [eventData, setEventData] = useState(null);
   const [reg, setReg] = useState(false);
 
-  // FETCH EVENT DATA
   useEffect(() => {
     const fetchEventData = async () => {
       try {
         const res = await api.get(`event/edit/${id}/`);
         setEventData(res.data);
 
-        // After eventData loaded, check if user registered
         const regRes = await api.get(`rsvp/register/`, {
           params: { event_id: res.data.id },
         });
@@ -33,7 +31,6 @@ const EventPage = () => {
     fetchEventData();
   }, [id]);
 
-  // REGISTER FOR EVENT
   const registration = async () => {
     if (!eventData || reg) return;
 
@@ -49,7 +46,6 @@ const EventPage = () => {
     }
   };
 
-  // SHARE EVENT
   const shareEvent = async () => {
     if (!eventData) return;
 
@@ -78,7 +74,6 @@ const EventPage = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
-      {/* HERO IMAGE */}
       <div className="relative w-full h-[50vh] sm:h-[60vh] md:h-[70vh] lg:h-[80vh] overflow-hidden">
         <img
           src={eventData.event_cover}
@@ -104,10 +99,8 @@ const EventPage = () => {
         </div>
       </div>
 
-      {/* MAIN CONTENT */}
       <main className="flex-1 max-w-7xl mx-auto px-6 md:px-10 py-16 w-full">
         <div className="grid lg:grid-cols-3 gap-12 lg:gap-20">
-          {/* LEFT CONTENT */}
           <div className="lg:col-span-2 space-y-12">
             <section>
               <h2 className="text-3xl font-bold text-gray-800 mb-6">
@@ -123,7 +116,6 @@ const EventPage = () => {
                 Event Details
               </h2>
               <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-10 space-y-10">
-                {/* Date & Time */}
                 <div className="flex items-center gap-6">
                   <div className="w-16 h-16 bg-red-100 rounded-2xl flex items-center justify-center">
                     <svg
@@ -148,7 +140,6 @@ const EventPage = () => {
                   </div>
                 </div>
 
-                {/* Location */}
                 <div className="flex items-center gap-6">
                   <div className="w-16 h-16 bg-pink-100 rounded-2xl flex items-center justify-center">
                     <svg
@@ -178,8 +169,6 @@ const EventPage = () => {
                     </p>
                   </div>
                 </div>
-
-                {/* Attendees */}
                 <div className="flex items-center gap-6">
                   <div className="w-16 h-16 bg-purple-100 rounded-2xl flex items-center justify-center">
                     <svg
@@ -209,7 +198,6 @@ const EventPage = () => {
             </section>
           </div>
 
-          {/* RIGHT CARD */}
           <div className="lg:col-span-1">
             <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8 sticky top-24">
               <h3 className="text-2xl font-bold text-gray-800 mb-8">

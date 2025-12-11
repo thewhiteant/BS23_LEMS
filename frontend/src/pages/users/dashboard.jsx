@@ -14,9 +14,9 @@ const UserDashboard = () => {
       try {
         const res = await api.get("user/dashboard/");
 
-        console.log(res); // debug
+        console.log(res);
 
-        setEvents(res.data.events); // ✔ correct
+        setEvents(res.data.events);
       } catch (err) {
         console.error("Dashboard Error:", err);
       } finally {
