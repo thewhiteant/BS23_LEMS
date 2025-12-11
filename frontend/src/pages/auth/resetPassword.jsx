@@ -1,69 +1,94 @@
 import React, { useState, useEffect } from "react";
 import logo from "../../assets/logo.png";
 import api from "../../services/api";
-import { useLocation, useNavigate, Link, replace } from "react-router-dom";
+import { useLocation, useNavigate, Link } from "react-router-dom";
+import PopupAlert from "../../components/popupAlert";
 
 const ResetPassword = () => {
   const location = useLocation();
   const navigate = useNavigate();
-
-  // Hidden user info from ForgotPassword
   const email = location.state?.email;
 
   const [otp, setOtp] = useState("");
   const [otpVerified, setOtpVerified] = useState(false);
-
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [message, setMessage] = useState("");
+  const [alert, setAlert] = useState({ message: "", type: "" });
 
-  // Redirect if no email in state
+  const showAlert = (message, type = "info") => {
+    setAlert({ message, type });
+  };
+
+  const closeAlert = () => {
+    setAlert({ message: "", type: "" });
+  };
+
   useEffect(() => {
-    if (!email) {
-      navigate("/"); // redirect to home
-    }
+    if (!email) navigate("/");
   }, [email, navigate]);
 
-  // Step 1: Verify OTP
   const handleVerifyOtp = async (e) => {
     e.preventDefault();
+
     try {
-      await api.post("user/verify-otp/", { email, otp });
-      setMessage("OTP verified. You can now reset your password.");
+      const res = await api.post("user/verify-otp/", { email, otp });
+
+      showAlert(res.data.message || "OTP Verified!", "success");
       setOtpVerified(true);
     } catch (err) {
-      setMessage("Invalid OTP.");
+      const errorMsg =
+        err.response?.data?.message ||
+        err.response?.data?.error ||
+        "Invalid OTP!";
+      showAlert(errorMsg, "error");
     }
   };
 
-  // Step 2: Reset password
   const handleResetPassword = async (e) => {
     e.preventDefault();
+
     if (newPassword !== confirmPassword) {
-      setMessage("Passwords do not match!");
+      showAlert("Passwords do not match!", "error");
       return;
     }
 
     try {
-      await api.post("user/reset-password/", {
+      const res = await api.post("user/reset-password/", {
         email,
         otp,
         new_password: newPassword,
         confirm_password: confirmPassword,
       });
-      setMessage("Password reset successful! You can now login.");
+
+      showAlert(res.data.message || "Password reset successful!", "success");
+
       setNewPassword("");
       setConfirmPassword("");
       setOtpVerified(false);
       setOtp("");
-      navigate("/", replace);
+
+      setTimeout(() => {
+        navigate("/login");
+      }, 1200);
     } catch (err) {
-      setMessage("Failed to reset password. Try again.");
+      const errorMsg =
+        err.response?.data?.message ||
+        err.response?.data?.error ||
+        "Failed to reset password!";
+      showAlert(errorMsg, "error");
     }
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-900">
+      {alert.message && (
+        <PopupAlert
+          message={alert.message}
+          type={alert.type}
+          onClose={closeAlert}
+        />
+      )}
+
       <div className="bg-gray-800 p-8 rounded-2xl shadow-lg w-full max-w-md text-gray-200">
         <div className="flex justify-center mb-6">
           <img src={logo} alt="Logo" className="h-25 w-35 object-contain" />
@@ -73,11 +98,6 @@ const ResetPassword = () => {
           Reset Password
         </h2>
 
-        {message && (
-          <p className="text-center mb-4 text-green-400">{message}</p>
-        )}
-
-        {/* Step 1: OTP input */}
         {!otpVerified && (
           <form onSubmit={handleVerifyOtp} className="space-y-4">
             <div>
@@ -101,7 +121,6 @@ const ResetPassword = () => {
           </form>
         )}
 
-        {/* Step 2: New password */}
         {otpVerified && (
           <form onSubmit={handleResetPassword} className="space-y-4">
             <div>
@@ -115,6 +134,7 @@ const ResetPassword = () => {
                 required
               />
             </div>
+
             <div>
               <label className="block text-gray-300 mb-1">
                 Confirm Password

@@ -3,10 +3,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
-from .models import Users
-from django.shortcuts import get_object_or_404
 import random
-from django.core.mail import send_mail
 from .serializers import (
     RegisterSerializer,
     LoginSerializer,
@@ -15,23 +12,20 @@ from .serializers import (
     UserResponseSerializer,
     ResponseMessages,
     ForgotPasswordSerializer,
-    OTPVerifySerializer
+    OTPVerifySerializer,
 )
+from .tasks import send_mail_x
+from .models import Users
+
 
 class LoginView(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
-        serializer = LoginSerializer(
-            data=request.data,
-            context={'request':request}
-        )
+        serializer = LoginSerializer(data=request.data, context={"request": request})
         serializer.is_valid(raise_exception=True)
 
-        return Response(
-            serializer.data,
-            status=status.HTTP_200_OK
-            )
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class RegisterView(APIView):
@@ -41,30 +35,27 @@ class RegisterView(APIView):
         serializer = RegisterSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return Response(serializer.data,status.HTTP_201_CREATED)
+
+        return Response(serializer.data, status.HTTP_201_CREATED)
 
 
 class ProfileView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        serializer = UserResponseSerializer(request.user, context={'request': request})
+        serializer = UserResponseSerializer(request.user, context={"request": request})
+
         return Response(serializer.data)
 
     def patch(self, request):
         serializer = ProfileUpdateSerializer(
-                    request.user,
-                    data=request.data,
-                    partial=True,
-                    context={'request': request}
-                )
-        serializer.is_valid(raise_exception=True)
-        serializer.save()  
-        return Response(
-            serializer.data,
-            status=status.HTTP_200_OK
+            request.user, data=request.data, partial=True, context={"request": request}
         )
-    
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
 
 class LogoutView(APIView):
     permission_classes = [IsAuthenticated]
@@ -72,23 +63,23 @@ class LogoutView(APIView):
     def post(self, request):
         refresh_token = request.data.get("refresh")
         if not refresh_token:
-            
+
             return Response(
                 {"error": ResponseMessages.REFRESH_TOKEN_REQUIRED},
-                status=status.HTTP_400_BAD_REQUEST
+                status=status.HTTP_400_BAD_REQUEST,
             )
         try:
             RefreshToken(refresh_token).blacklist()
-            
+
             return Response(
                 {"message": ResponseMessages.LOGOUT},
-                status=status.HTTP_205_RESET_CONTENT
+                status=status.HTTP_205_RESET_CONTENT,
             )
         except Exception:
-            
+
             return Response(
                 {"error": ResponseMessages.INVALID_TOKEN},
-                status=status.HTTP_400_BAD_REQUEST
+                status=status.HTTP_400_BAD_REQUEST,
             )
 
 
@@ -99,7 +90,7 @@ class ForgotPasswordRequest(APIView):
         serializer = ForgotPasswordSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        email = serializer.validated_data['email'].lower()
+        email = serializer.validated_data["email"].lower()
         user = Users.objects.filter(email=email).first()
         if not user:
             return Response({"message": ResponseMessages.INVALID_EMAIL}, status=400)
@@ -108,13 +99,7 @@ class ForgotPasswordRequest(APIView):
         user.reset_otp = otp
         user.save()
 
-        send_mail(
-            "Your Password Reset OTP",
-            f"Your OTP is: {otp}",
-            "noreply@example.com",
-            [email],
-            fail_silently=False,
-        )
+        send_mail_x.delay("Your Password Reset OTP", f"Your OTP is: {otp}", email)
 
         return Response({"message": ResponseMessages.OTP_SENT}, status=200)
 
@@ -126,10 +111,7 @@ class VerifyResetOTP(APIView):
         serializer = OTPVerifySerializer(data=request.data)
         if serializer.is_valid():
 
-            return Response(
-                {"message": ResponseMessages.OTP_VERIFIED},
-                status=status.HTTP_200_OK
-            )
+            return Response(serializer.data, status=status.HTTP_200_OK)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -142,22 +124,16 @@ class ResetPasswordOTP(APIView):
 
         if serializer.is_valid():
             serializer.save()
-            return Response(
-                {"message": "Password has been reset successfully."},
-                status=status.HTTP_200_OK
-            )
+            return Response(serializer.data, status=status.HTTP_200_OK)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
 
 
-# class IsAdminView(APIView):
-#     permission_classes = [IsAuthenticated]
+class IsAdminView(APIView):
+    permission_classes = [IsAuthenticated]
 
-#     def get(self, request):
-#         user = request.user
-#         is_admin = user.is_staff 
+    def get(self, request):
+        user = request.user
+        is_admin = user.is_staff
 
-#         return Response({
-#             "is_admin": is_admin
-#         }, status=200)
+        return Response({"is_admin": is_admin}, status=200)

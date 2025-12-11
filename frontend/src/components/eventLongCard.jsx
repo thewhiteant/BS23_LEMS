@@ -6,10 +6,6 @@ const EventCard = ({ event, onDelete }) => {
   const user = JSON.parse(localStorage.getItem("user"));
 
   const isUpcoming = new Date(event.date_time) > new Date();
-
-  // =============================
-  //  CHECK IF USER CAN CANCEL
-  // =============================
   let canCancel = false;
 
   if (event.rsvp_status === "confirmed" && event.rsvp_created_at) {
@@ -89,9 +85,7 @@ const EventCard = ({ event, onDelete }) => {
         </div>
       </div>
 
-      {/* RIGHT SIDE BUTTONS */}
       {user?.is_staff ? (
-        // ADMIN BUTTONS
         <div className="flex flex-col gap-2 items-start self-start">
           <button
             onClick={() => navigate(`/admin/event/rsvp-list/${event.id}`)}
@@ -115,9 +109,7 @@ const EventCard = ({ event, onDelete }) => {
           </button>
         </div>
       ) : (
-        // USER SIDE BUTTONS
         <div className="self-start">
-          {/* ALREADY CANCELLED */}
           {event.rsvp_status === "cancelled" && (
             <button
               disabled
@@ -127,7 +119,6 @@ const EventCard = ({ event, onDelete }) => {
             </button>
           )}
 
-          {/* CANCEL ALLOWED (within 24h) */}
           {canCancel && (
             <button
               onClick={handleCancel}
@@ -137,7 +128,6 @@ const EventCard = ({ event, onDelete }) => {
             </button>
           )}
 
-          {/* 24h expired → hide cancel, show text */}
           {!canCancel && event.rsvp_status === "confirmed" && isUpcoming && (
             <p className="text-gray-500 text-sm mt-2">
               ⏳ Cancellation window expired

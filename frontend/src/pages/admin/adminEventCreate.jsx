@@ -2,6 +2,7 @@ import { useState } from "react";
 import Footer from "../../components/footer";
 import AdminMenu from "../../components/adminMenu";
 import api from "../../services/api";
+import PopupAlert from "../../components/popupAlert";
 
 const AdminCreateEvent = () => {
   const [formData, setFormData] = useState({
@@ -13,12 +14,17 @@ const AdminCreateEvent = () => {
     price: 0,
     event_cover: null,
   });
-
   const [imagePreview, setImagePreview] = useState(null);
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  // ---------------- HANDLE INPUT ---------------- //
+  // Popup alert state
+  const [alert, setAlert] = useState({
+    visible: false,
+    message: "",
+    type: "info",
+  });
+
   const handleChange = (e) => {
     const { name, value, files } = e.target;
 
@@ -30,7 +36,6 @@ const AdminCreateEvent = () => {
     }
   };
 
-  // ---------------- HANDLE SUBMIT ---------------- //
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -49,22 +54,47 @@ const AdminCreateEvent = () => {
       }
 
       await api.post("event/add/", data, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
+        headers: { "Content-Type": "multipart/form-data" },
       });
 
       setSubmitted(true);
-    } catch (error) {
-      console.error("Event creation failed:", error);
-      alert("Failed to create event!");
-    } finally {
-      setLoading(false);
+      setAlert({
+        visible: true,
+        message: "Event created successfully!",
+        type: "success",
+      });
+    } catch (err) {
+      console.error("Event creation failed:", err);
+      let message = "Failed to create event!";
+      if (err.response?.data) {
+        const errors = err.response.data;
+        const messages = Object.values(errors)
+          .flat()
+          .map((e) =>
+            typeof e === "string" ? e : Object.values(e).flat().join(" ")
+          );
+
+        message = messages.join(" ");
+      }
+      setAlert({
+        visible: true,
+        message,
+        type: "error",
+      });
     }
   };
 
   return (
     <div className="min-h-screen bg-gray-100">
+      {/* Popup Alert */}
+      {alert.visible && (
+        <PopupAlert
+          message={alert.message}
+          type={alert.type}
+          onClose={() => setAlert({ ...alert, visible: false })}
+        />
+      )}
+
       <div className="p-6 flex justify-end">
         <AdminMenu />
       </div>
@@ -195,7 +225,7 @@ const AdminCreateEvent = () => {
               )}
             </div>
 
-            {/* Submit */}
+            {/* Submit Button */}
             <div>
               <button
                 type="submit"

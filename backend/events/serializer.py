@@ -1,15 +1,23 @@
 from rest_framework import serializers
+from django.utils import timezone
+
+from config.constans import ResponseMessages
 from .models import Events
 from rsvp.models import RSVP
 
-class EventSerializer(serializers.ModelSerializer):
 
+class EventSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Events
-        fields = "__all__"  
+        fields = "__all__"
 
-
+    def validate_date_time(self, value):
+        if value < timezone.now():
+            raise serializers.ValidationError(
+                {"date_time": ResponseMessages.EVENT_CANT_IN_PAST}
+            )
+        return value
 
 
 class CustomTokenAddedSerializer(serializers.ModelSerializer):
@@ -30,7 +38,7 @@ class CustomTokenAddedSerializer(serializers.ModelSerializer):
             "event_cover",
             "token",
             "rsvp_status",
-            "rsvp_created_at"
+            "rsvp_created_at",
         ]
 
     def get_token(self, obj):
@@ -47,14 +55,9 @@ class CustomTokenAddedSerializer(serializers.ModelSerializer):
         rsvp = RSVP.objects.filter(user=user, event=obj).first()
         return rsvp.status if rsvp else None
 
-    def get_event_cover(self, obj):
-        request = self.context.get("request")
-        if obj.event_cover:
-            return request.build_absolute_uri(obj.event_cover.url)
-        return None
     def get_rsvp_created_at(self, obj):
-            user = self.context.get("user")
-            rsvp = RSVP.objects.filter(user=user, event=obj).first()
-            if rsvp:
-                return rsvp.created_at.isoformat()
-            return None
+        user = self.context.get("user")
+        rsvp = RSVP.objects.filter(user=user, event=obj).first()
+        if rsvp:
+            return rsvp.created_at.isoformat()
+        return None

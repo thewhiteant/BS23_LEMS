@@ -1,193 +1,145 @@
+from datetime import timedelta
 from rest_framework.views import APIView
+from django.utils import timezone
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.shortcuts import get_object_or_404
 from .models import RSVP, InviteToken
 from events.models import Events
-from .serializer import RSVPSerializer ,InviteTokenSerializer
+from .serializer import (
+    RSVPSerializer,
+    InviteTokenSerializer,
+    PublicRSVPSerializer,
+    CancelRSVPSerializer,
+)
 from events.serializer import CustomTokenAddedSerializer
 from events.serializer import EventSerializer
 from django.core.mail import send_mail
-
-
-class RegisterUserView(APIView):
-    permission_classes = [IsAuthenticated]   
-
-    def get(self, request):
-        event_id = request.query_params.get("event_id")
-        if not event_id:
-            return Response({"message": "event_id is required!"}, status=status.HTTP_400_BAD_REQUEST)
-        event = get_object_or_404(Events, id=event_id)
-        is_registered = RSVP.objects.filter(event=event, user=request.user).exists()
-        
-        return Response({"is_registered": is_registered}, status=status.HTTP_200_OK)
-
-    def post(self, request):
-        event_id = request.data.get("event_id")
-        if not event_id:
-            return Response({"error": "event_id is required"}, status=status.HTTP_400_BAD_REQUEST)
-
-        event = get_object_or_404(Events, id=event_id)
-
-        # 1. Prevent duplicate RSVP (Uses the unique_together on user/event)
-        if RSVP.objects.filter(event=event, user=request.user).exists():
-            return Response({"error": "Already Registered"}, status=status.HTTP_400_BAD_REQUEST)
-
-        # 2. Check event availability
-        current = RSVP.objects.filter(event=event, status="confirmed").count()
-        if current >= event.max_attendees:
-            return Response({"error": "Event is full"}, status=status.HTTP_400_BAD_REQUEST)
-
-        # 3. Create RSVP
-        # 🟢 FIX 3: Pass the logged-in user's email to guest_email. 
-        # This prevents the guest_email from being NULL, which was the root cause of the unique constraint error.
-        rsvp = RSVP.objects.create(
-            user=request.user,
-            event=event,
-            guest_email=request.user.email,  # <-- NEW LINE ADDED HERE
-            status="confirmed"
-        )
-        
-        # 4. Update counts
-        user = request.user
-        user.attend_number_of_event = (user.attend_number_of_event or 0) + 1
-        user.save()
-        event.attendees = (event.attendees or 0)+1
-        event.save()
-
-        return Response({"token": rsvp.token}, status=status.HTTP_201_CREATED)
-
-
-class SelectedUserView(APIView):
-    permission_classes = [IsAuthenticated]
-    
-
-
-class RegisterPublicView(APIView):
-    permission_classes = [AllowAny]
-
-    # GET: Check invite token and see if already registered
-    def get(self, request, token):
-        invite = get_object_or_404(InviteToken, token=token)
-
-        if invite.is_expired():
-            return Response({"error": "Invite link has expired"}, status=status.HTTP_400_BAD_REQUEST)
-
-        if invite.is_used:
-            # Already used → find who registered
-            rsvp = RSVP.objects.filter(invite_token=invite, status="confirmed").first()
-            if rsvp:
-                event_data = EventSerializer(invite.event, context={"request": request}).data
-                return Response({
-                    "event": event_data,
-                    "is_registered": True,
-                    "rsvp_token": str(rsvp.token),
-                    "guest_email": rsvp.guest_email,
-                })
-
-        event_data = EventSerializer(invite.event, context={"request": request}).data
-        return Response({
-            "event": event_data,
-            "is_registered": False,
-        })
-
-    # POST: Register the guest
-    def post(self, request):
-        guest_email = request.data.get("guest_email")
-        token = request.data.get("token")
-
-        if not guest_email:
-            return Response({"error": "Email is required"}, status=status.HTTP_400_BAD_REQUEST)
-
-        invite = get_object_or_404(InviteToken, token=token)
-
-        if invite.is_expired():
-            return Response({"error": "Invite link has expired"}, status=status.HTTP_400_BAD_REQUEST)
-
-        if invite.is_used:
-            return Response({"error": "This invite link has already been used"}, status=status.HTTP_400_BAD_REQUEST)
-
-        event = invite.event
-
-        # Check capacity
-        confirmed_count = RSVP.objects.filter(event=event, status="confirmed").count()
-        if event.max_attendees and confirmed_count >= event.max_attendees:
-            return Response({"error": "Event is full"}, status=status.HTTP_400_BAD_REQUEST)
-
-        # Create RSVP
-        rsvp = RSVP.objects.create(
-            event=event,
-            guest_email=guest_email,
-            invite_token=invite,
-            status="confirmed"
-        )
-
-        invite.is_used = True
-        invite.save()
-
-        return Response({
-            "message": "Registration successful!",
-            "token": str(rsvp.token),  
-        }, status=status.HTTP_201_CREATED)
-
-class CancelRSVPView(APIView):
-    permission_classes = [AllowAny]
-    def post(self, request):
-        rsvp_token = request.data.get("token")
-
-        if not rsvp_token:
-            return Response({"error": "Token is required"}, status=status.HTTP_400_BAD_REQUEST)
-
-        rsvp = get_object_or_404(RSVP, token=rsvp_token)
-
-        if rsvp.status == "cancelled":
-            return Response({"message": "Already cancelled"}, status=status.HTTP_400_BAD_REQUEST)
-
-        rsvp.status = "cancelled"
-        rsvp.save()
-        
-        if rsvp.invite_token:
-            rsvp.invite_token.delete()  
-
-        return Response({
-            "message": "RSVP cancelled. This invite link is now permanently dead and cannot be reused."
-        }, status=status.HTTP_200_OK)
-
-
-
-# ----------------- 4. INVITE LINK GENERATOR -----------------
-class LinkGenaratorView(APIView):
-    permission_classes = [AllowAny]
-
-    def post(self, request):
-        event_id = request.data.get("event_id")
-        if not event_id:
-            return Response({"error": "event_id is required"}, status=status.HTTP_400_BAD_REQUEST)
-
-        event = get_object_or_404(Events, id=event_id)
-
-        invite_token = InviteToken.objects.create(event=event)
-
-        invite_url = request.build_absolute_uri(
-            f"/invite/{invite_token.token}/"
-        )
-
-        return Response({"link": invite_url}, status=status.HTTP_201_CREATED)
+from config.constans import ResponseMessages
 
 
 class UserDashboardView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        user = request.user  
-        reservations = RSVP.objects.filter(user=user).select_related('event')
+        user = request.user
+        reservations = RSVP.objects.filter(user=user).select_related("event")
         events = Events.objects.filter(rsvps__in=reservations).distinct()
-        serializer = CustomTokenAddedSerializer(events, many=True,context={'request': request,"user": request.user})
-        return Response({
-            "events": serializer.data
-        }, status=status.HTTP_200_OK)
+        serializer = CustomTokenAddedSerializer(
+            events, many=True, context={"request": request, "user": request.user}
+        )
+        return Response({"events": serializer.data}, status=status.HTTP_200_OK)
 
+
+class RegisterUserView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        event_id = request.query_params.get("event_id")
+        event = get_object_or_404(Events, id=event_id)
+        is_registered = RSVP.objects.filter(event=event, user=request.user).exists()
+
+        return Response({"is_registered": is_registered}, status=status.HTTP_200_OK)
+
+    def post(self, request):
+        event_id = request.data.get("event_id")
+        if not event_id:
+            return Response(
+                {"error": ResponseMessages.EVENT_ID_REQUIRED},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        event = get_object_or_404(Events, id=event_id)
+
+        serializer = RSVPSerializer(
+            data={}, context={"user": request.user, "event": event}
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+class RegisterPublicView(APIView):
+    permission_classes = [AllowAny]
+
+    def get(self, request, token):
+        invite = get_object_or_404(InviteToken, token=token)
+
+        if invite.is_expired():
+            return Response(
+                {"error": ResponseMessages.TOKEN_EXPIRED},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if invite.is_used:
+
+            rsvp = RSVP.objects.filter(invite_token=invite, status="confirmed").first()
+            if rsvp:
+                event_data = EventSerializer(
+                    invite.event, context={"request": request}
+                ).data
+                return Response(
+                    {
+                        "event": event_data,
+                        "is_registered": True,
+                        "rsvp_token": str(rsvp.token),
+                        "guest_email": rsvp.guest_email,
+                    }
+                )
+
+        event_data = EventSerializer(invite.event, context={"request": request}).data
+        return Response(
+            {
+                "event": event_data,
+                "is_registered": False,
+            }
+        )
+
+    def post(self, request):
+        serializer = PublicRSVPSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        rsvp = serializer.save()
+
+        return Response(
+            {
+                "message": ResponseMessages.RSVP_SUCCESS,
+                "rsvp": PublicRSVPSerializer(rsvp).data,
+            },
+            status=201,
+        )
+
+
+class CancelRSVPView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        serializer = CancelRSVPSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        rsvp = serializer.save()
+
+        return Response(
+            {
+                "message": ResponseMessages.RSVP_CANCELLED,
+            },
+            status=200,
+        )
+
+
+class LinkGenaratorView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        event_id = request.data.get("event_id")
+        if not event_id:
+            return Response(
+                {"error": "event_id is required"}, status=status.HTTP_400_BAD_REQUEST
+            )
+
+        event = get_object_or_404(Events, id=event_id)
+        invite_token = InviteToken.objects.create(event=event)
+        invite_url = request.build_absolute_uri(f"/invite/{invite_token.token}/")
+
+        return Response({"link": invite_url}, status=status.HTTP_201_CREATED)
 
 
 class EventRSVPListView(APIView):
@@ -196,12 +148,14 @@ class EventRSVPListView(APIView):
     def get(self, request):
         event_id = request.query_params.get("event_id")
         if not event_id:
-            return Response({"error": "event_id is required"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"error": "event_id is required"}, status=status.HTTP_400_BAD_REQUEST
+            )
 
         event = get_object_or_404(Events, id=event_id)
 
         rsvps = RSVP.objects.filter(event=event).order_by("-status", "created_at")
-        serializer = RSVPSerializer(rsvps, many=True, context={'request': request})
+        serializer = RSVPSerializer(rsvps, many=True, context={"request": request})
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
@@ -215,20 +169,20 @@ class SendEmailAPIView(APIView):
             send_mail(
                 subject,
                 message,
-                None,  
+                None,
                 [recipient],
                 fail_silently=False,
             )
 
             return Response(
                 {"status": "success", "message": "Email sent! Check console."},
-                status=status.HTTP_200_OK
+                status=status.HTTP_200_OK,
             )
 
         except Exception as e:
             return Response(
                 {"status": "error", "message": str(e)},
-                status=status.HTTP_400_BAD_REQUEST
+                status=status.HTTP_400_BAD_REQUEST,
             )
 
 
@@ -236,16 +190,26 @@ class InviteListView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        invites = InviteToken.objects.prefetch_related("rsvps__user").select_related("event").all().order_by("-created_at")
+        invites = (
+            InviteToken.objects.select_related("event")
+            .prefetch_related("rsvps__user")
+            .all()
+            .order_by("-created_at")
+        )
+
         expired_param = request.query_params.get("expired")
         if expired_param is not None:
+            now = timezone.now()
+            expire_time = now - timedelta(hours=12)
             if expired_param.lower() == "true":
-                invites = [invite for invite in invites if invite.is_expired(hours=12)]
+                invites = invites.filter(created_at__lte=expire_time)
             elif expired_param.lower() == "false":
-                invites = [invite for invite in invites if not invite.is_expired(hours=12)]
+                invites = invites.filter(created_at__gt=expire_time)
+
         serializer = InviteTokenSerializer(invites, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
-    
+
+
 class InviteDeleteView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -253,15 +217,17 @@ class InviteDeleteView(APIView):
         invite = get_object_or_404(InviteToken, id=token_id)
         invite.delete()
         return Response({"status": "success"}, status=status.HTTP_200_OK)
-    
+
 
 class InviteExpireView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request, token_id):
         invite = get_object_or_404(InviteToken, id=token_id)
-        # Force expire by setting created_at far in the past
-        from django.utils import timezone
+
         invite.created_at = timezone.now() - timezone.timedelta(hours=24)
         invite.save()
-        return Response({"status": "success", "message": "Invite expired"}, status=status.HTTP_200_OK)
+        return Response(
+            {"status": "success", "message": "Invite expired"},
+            status=status.HTTP_200_OK,
+        )

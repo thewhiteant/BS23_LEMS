@@ -1,6 +1,6 @@
 from django.db import models
-
 from django.utils import timezone
+
 
 class Events(models.Model):
     title = models.CharField(max_length=200)
@@ -12,13 +12,11 @@ class Events(models.Model):
     price = models.FloatField(default=0.00)
     event_cover = models.ImageField(upload_to="media/events/", blank=True, null=True)
 
-
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(default=timezone.now)
 
     def __str__(self):
         return self.title
-    
-    class Meta:                       
+
+    class Meta:
         verbose_name_plural = "Events"
-        
