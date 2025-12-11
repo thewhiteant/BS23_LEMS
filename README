@@ -1,5 +1,6 @@
-````markdown
 # LEMS (Local Event Management System)
+
+A modern, web-based system designed to efficiently manage local events, track RSVPs, and prepare for future paid event ticketing.
 
 ---
 
@@ -21,221 +22,210 @@
 
 ## Introduction
 
-**LEMS** (Local Event Management System) is a modern web-based system to efficiently manage local events.  
-The system enables admins to create and manage events, users to RSVP and track attendance, and optionally, in the future, to purchase paid event tickets.
+**LEMS** (Local Event Management System) is a comprehensive web-based platform. It allows **Admins** to create and manage events, and **Users** to easily RSVP and track attendance, with an architecture ready to support paid ticketing and payment processing in the future.
 
-### Purpose
+### 💡 Purpose
 
-- Simplify event creation and management.
-- Track RSVPs and attendance.
-- Prepare for optional paid event functionality.
+* Simplify event creation, approval, and management workflows.
+* Accurately track RSVPs and attendance.
+* Establish a robust foundation for optional paid event functionality (ticketing, payments).
 
-### Scope
+### 📐 Scope
 
-- Event creation, management, and approval workflow for admins.
-- RSVP tracking for registered and non-registered users.
-- Admin and user dashboards.
-- Email notifications for RSVP confirmation and event reminders (via Celery).
-- Optional future features: paid events, ticket types, payment gateway integration.
+* **Core Management:** Event creation, editing, deletion, and an optional approval workflow for Admins.
+* **User Interaction:** RSVP tracking for both registered and non-registered users.
+* **Dashboards:** Dedicated dashboards for Admin and Registered Users.
+* **Notifications:** Asynchronous email notifications for RSVP confirmation and event reminders via Celery.
+* **Future-Ready:** Data models and integration points for paid events, ticket types, and payment gateways.
 
 ---
 
 ## Features
 
-### Admin Features
+### 👑 Admin Features
 
-- Add, edit, and delete events
-- Event fields: title, description, date/time, location, max attendees, status
-- View RSVPs for each event
-- Export RSVPs to CSV
-- Future-ready: event pricing, ticket types, payment management
+* **Event CRUD:** Add, edit, and delete events.
+    * *Event fields:* title, description, date/time, location, max attendees, and status (e.g., Draft, Approved).
+* **RSVP Management:** View and manage all RSVPs for an event.
+* **Reporting:** Export RSVP lists to CSV format.
+* **Future-Ready:** Event pricing, ticket type configuration, and payment transaction management.
 
-### Registered User Features
+### 👥 Registered User Features
 
-- Signup/Login (JWT authentication)
-- View upcoming and past events
-- RSVP for events (limit by max attendees)
-- Cancel RSVP
-- Dashboard: My RSVPs, upcoming events
-- Future-ready: pay for event tickets
+* **Authentication:** Secure signup/login using **JWT** (JSON Web Tokens).
+* **Event Browsing:** View upcoming and past events.
+* **RSVP:** Register for events (enforced limit by max attendees).
+* **Management:** Cancel existing RSVPs.
+* **Dashboard:** Personalized overview of 'My RSVPs' and upcoming events.
+* **Future-Ready:** Ability to purchase event tickets.
 
-### Non-Registered User Features
+### 👤 Non-Registered User Features
 
-- RSVP via secure invitation link (token-based)
-- Provide email as identifier
-- Future-ready: pay for tickets via secure link
+* **Secure RSVP:** RSVP via a secure, token-based invitation link.
+* **Identification:** Required to provide an email address as a unique identifier.
+* **Future-Ready:** Ability to pay for tickets via the secure link.
 
-### Notifications
+### 📧 Notifications (via Celery)
 
-- Email confirmation on RSVP (handled asynchronously via Celery)
-- Future-ready: ticket/receipt emails for paid events
+* Asynchronous email confirmation upon successful RSVP.
+* **Future-Ready:** Automated ticket and receipt emails for paid events.
 
-### Extra Features
+### ✨ Extra Features
 
-- Event categories/tags (Conference, Workshop, Meetup)
-- Pagination and search
-- Event detail page with attendee list (admin only)
-- Responsive UI with **React + Tailwind CSS**
+* Event categorization using tags (e.g., Conference, Workshop, Meetup).
+* Pagination and search functionality for event listings.
+* Admin-only event detail page with a complete attendee list.
+* Responsive and modern UI built with **React + Tailwind CSS**.
 
 ---
 
 ## User Classes
 
-| User Class          | Access                                                                    |
-| ------------------- | ------------------------------------------------------------------------- |
-| Admin               | Full CRUD on events, approve events, view RSVPs, optional manage payments |
-| Registered User     | View events, RSVP, cancel RSVP, future purchase tickets                   |
-| Non-Registered User | RSVP via token link, future purchase tickets                              |
+| User Class | Key Permissions & Access |
+| :--- | :--- |
+| **Admin** | Full CRUD on events, event approval, view/export RSVPs, future management of payments/tickets. |
+| **Registered User** | View events, RSVP, cancel RSVP, manage personal dashboard, future ticket purchase. |
+| **Non-Registered User** | RSVP via secure token link, future ticket purchase via link. |
 
 ---
 
 ## Tech Stack
 
-- **Frontend:** React.js, Tailwind CSS
-- **Backend:** Django REST Framework (Python 3.x)
-- **Authentication:** JWT (JSON Web Tokens)
-- **Database:** PostgreSQL / SQLite
-- **Email:** SMTP / Celery for asynchronous tasks
-- **Future:** Stripe / PayPal / local payment gateways
+| Component | Technology | Role |
+| :--- | :--- | :--- |
+| **Frontend** | React.js, Tailwind CSS | Modular, responsive UI/UX |
+| **Backend** | Django REST Framework (Python 3.x) | Robust, secure API development |
+| **Authentication** | JWT (JSON Web Tokens) | Stateless and secure API access |
+| **Database** | PostgreSQL / SQLite | Data persistence and integrity |
+| **Asynchronous Tasks** | Celery, Redis (Broker) | Email sending, background processing |
+| **Future Integration** | Stripe / PayPal / Local Gateways | Payment processing |
 
 ---
 
 ## Installation
 
-### Backend Setup
+### 1. Backend Setup (Django REST Framework)
 
-1. Clone the repository:
+1.  **Clone the repository:**
+    ```bash
+    git clone <your-repo-url>
+    cd lems
+    ```
 
-```bash
-git clone <your-repo-url>
-cd lems
-```
-````
+2.  **Create and activate a virtual environment:**
+    * *Linux/macOS:*
+        ```bash
+        python3 -m venv env
+        source env/bin/activate
+        ```
+    * *Windows:*
+        ```bash
+        python -m venv env
+        env\Scripts\activate
+        ```
 
-2. Create and activate a virtual environment:
+3.  **Install dependencies:**
+    ```bash
+    pip install -r requirements.txt
+    ```
 
-```bash
-python -m venv env
-source env/bin/activate  # Linux/macOS
-env\Scripts\activate     # Windows
-```
+4.  **Apply database migrations:**
+    ```bash
+    python manage.py migrate
+    ```
 
-3. Install dependencies:
+5.  **Create a superuser (Admin account):**
+    ```bash
+    python manage.py createsuperuser
+    ```
 
-```bash
-pip install -r requirements.txt
-```
+6.  **Start Django server:**
+    ```bash
+    python manage.py runserver
+    ```
+    *The API will be running at `http://localhost:8000`.*
 
-4. Apply database migrations:
+### 2. Frontend Setup (React)
 
-```bash
-python manage.py migrate
-```
+1.  **Navigate to the frontend folder:**
+    ```bash
+    cd frontend
+    ```
 
-5. Create a superuser (admin):
+2.  **Install dependencies:**
+    ```bash
+    npm install
+    ```
 
-```bash
-python manage.py createsuperuser
-```
-
-6. Start Django server:
-
-```bash
-python manage.py runserver
-```
-
-### Frontend Setup
-
-1. Navigate to the frontend folder:
-
-```bash
-cd frontend
-```
-
-2. Install dependencies:
-
-```bash
-npm install
-```
-
-3. Start React development server:
-
-```bash
-npm start
-```
-
-4. Access the app at `http://localhost:3000`.
+3.  **Start React development server:**
+    ```bash
+    npm start
+    ```
+    *Access the application at `http://localhost:3000`.*
 
 ---
 
 ## Usage
 
-- **Admin:** create events, view RSVPs, export CSV.
-- **Registered User:** view events, RSVP, manage your RSVPs.
-- **Non-Registered User:** RSVP via secure token link.
+* **Admin:** Log in to the Admin dashboard to create, manage, and approve events, view RSVP statistics, and export attendee data.
+* **Registered User:** Browse events, log in, and click "RSVP" to secure your spot. Use the personal dashboard to track and cancel existing RSVPs.
+* **Non-Registered User:** Receive a secure invitation link via email or external channel. Click the link to RSVP directly without needing an account.
 
 ---
 
 ## Database Design
 
-- **User**: Registered users
-- **Event**: title, description, date/time, location, max attendees, optional price
-- **RSVP**: links User or token/email to Event
-- **EventCategory**: optional categories/tags
-- **Ticket/Payment**: future implementation for paid events
+The system employs a relational structure to link events, users, and RSVPs securely.
 
-**Relationships:**
+* **`User`**: Registered user accounts.
+* **`Event`**: Core event details (title, dates, location, max attendees, price).
+* **`RSVP`**: Core linking table for attendance.
+    * *Links a `User` **or** a token/email to an `Event`.*
+* **`EventCategory`**: Optional tags for event organization.
+* **`Ticket/Payment`**: Future table for paid transaction details.
 
-- Event ↔ RSVP (1:N)
-- User ↔ RSVP (1:N, nullable for non-registered users)
-- Event ↔ EventCategory (1:N)
-- Event ↔ Ticket/Payment (1:N future)
+> **Conceptual Relationships:**
+> * **Event ↔ RSVP:** One-to-Many (1:N)
+> * **User ↔ RSVP:** One-to-Many (1:N, nullable for non-registered users)
+> * **Event ↔ EventCategory:** One-to-Many (1:N)
+> * **Event ↔ Ticket/Payment:** One-to-Many (1:N, future implementation)
 
 ---
 
-## Functional Requirements (MVP + Future)
+## Functional Requirements (MVP & Future)
 
-- Admin: CRUD events, view RSVPs, export CSV, manage pricing/tickets (future)
-- Users: register/login, view events, RSVP, cancel RSVP, pay for tickets (future)
-- Non-Registered Users: RSVP via secure token link, pay via token (future)
-- Notifications: RSVP confirmation, reminder emails, ticket emails (future, via Celery)
-- Reporting/Dashboard: Admin & user dashboards with RSVP stats
+* **F-1:** Admin: Full CRUD operations for event management.
+* **F-2:** Admin: View and export RSVP lists (CSV).
+* **F-3:** Users: Complete registration and JWT-authenticated login/logout.
+* **F-4:** Users: View and search for events.
+* **F-5:** Users: RSVP for events and cancel existing RSVPs.
+* **F-6:** Non-Registered Users: Secure, token-based RSVP without registration.
+* **F-7:** Notifications: Asynchronous RSVP confirmation and reminder emails (Celery).
+* **F-8 (Future):** Admin: Manage event pricing and ticket types.
+* **F-9 (Future):** Users: Purchase event tickets and receive ticket emails.
 
 ---
 
 ## Non-Functional Requirements
 
-- Performance: handle 1000+ concurrent users
-- Security: JWT authentication, token-based RSVPs, hashed passwords, secure payment fields
-- Usability: responsive, intuitive UI, notifications
-- Maintainability: modular Django apps (events, users, RSVPs, notifications, payments)
-- Scalability: future payment integration, multi-language support, mobile app ready
+* **Performance:** The system must be able to handle **1000+ concurrent users** during peak event registration periods.
+* **Security:** Implementation of **JWT** for API authentication, **token-based RSVPs** for security, hashed passwords, and future secure handling of payment data.
+* **Usability:** Responsive, intuitive UI/UX built with React and Tailwind CSS.
+* **Maintainability:** Backend structured into modular Django applications (e.g., `events`, `users`, `rsvps`, `notifications`) for clean separation of concerns.
+* **Scalability:** Ready for future payment gateway integration and deployment on scalable cloud infrastructure.
 
 ---
 
 ## Future Enhancements
 
-- Paid events and ticketing
-- Payment gateways (Stripe / PayPal / local)
-- Event calendar integration
-- Guest checkout for paid events
-- Mobile app support
+* **Paid Events:** Full implementation of paid events and complex ticketing logic.
+* **Payment Gateways:** Integration with major payment providers (**Stripe / PayPal**) or local gateways.
+* **Calendar Integration:** iCal/Google Calendar export for events.
+* **Guest Checkout:** Seamless checkout process for non-registered users for paid events.
+* **Mobile Support:** Planning for a dedicated mobile application or PWA.
 
 ---
 
 ## License
 
-[MIT License](LICENSE) (or specify your license here)
-
-```
-
----
-
-This README is **full-length, professional, and detailed**, covering:
-- Modern frontend + backend setup
-- JWT authentication
-- Celery for async email tasks
-- Future-ready features
-- Installation & usage instructions
-
-```
+This project is licensed under the [MIT License](LICENSE). *(Note: Ensure you include a `LICENSE` file in your repository.)*
