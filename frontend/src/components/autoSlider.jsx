@@ -34,6 +34,7 @@ const HeroSlider = ({ events = [] }) => {
   const slides =
     events.length > 0
       ? events.map((event) => ({
+          id: event.id,
           img: event.event_cover,
           title: event.title,
           subtitle:
@@ -76,7 +77,7 @@ const HeroSlider = ({ events = [] }) => {
                 {slide.subtitle}
               </p>
               <button
-                onClick={() => navigate(`/event/${events.id}/`)}
+                onClick={() => navigate(`/event/${slide.id}/`)}
                 className="px-6 py-3 bg-white/20 backdrop-blur-md rounded-lg text-white border border-white/40 hover:bg-white/30 transition"
               >
                 Attend →
