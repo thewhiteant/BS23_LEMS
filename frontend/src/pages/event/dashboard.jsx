@@ -9,10 +9,12 @@ import AdminMenu from "../../components/adminMenu";
 
 const Dashboard = () => {
   const [events, setEvents] = useState([]);
+  const [topEvents, setTopEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
   const [locationFilter, setLocationFilter] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
+
   const eventsPerPage = 10;
   const user = JSON.parse(localStorage.getItem("user"));
 
@@ -27,11 +29,27 @@ const Dashboard = () => {
         setLoading(false);
       }
     };
+
     fetchEvents();
+  }, []);
+
+  useEffect(() => {
+    const fetchTopEvents = async () => {
+      try {
+        const res = await api.get("event/top/");
+        setTopEvents(res.data);
+        console.log("Top events:", res.data);
+      } catch (err) {
+        console.error("Error loading top events:", err);
+      }
+    };
+
+    fetchTopEvents();
   }, []);
 
   const filteredEvents = useMemo(() => {
     const q = query.trim().toLowerCase();
+
     return events.filter((ev) => {
       const title = ev.title?.toLowerCase() || "";
       const desc = ev.desc?.toLowerCase() || "";
@@ -43,6 +61,7 @@ const Dashboard = () => {
         return false;
 
       if (!q) return true;
+
       return title.includes(q) || desc.includes(q) || location.includes(q);
     });
   }, [events, query, locationFilter]);
@@ -58,7 +77,7 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-white to-gray-50">
-      <HeroSlider events={events.length > 0 ? events : undefined} />
+      <HeroSlider events={topEvents.length > 0 ? topEvents : undefined} />
 
       <div className="fixed top-4 right-4 z-[9999]">
         {user?.is_staff ? <AdminMenu /> : <ProfileMenu />}

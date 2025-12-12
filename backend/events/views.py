@@ -1,6 +1,7 @@
 from django.utils import timezone
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from django.db.models import Count, Q
 from rest_framework import status
 from django.shortcuts import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
@@ -10,11 +11,30 @@ from .models import Events
 
 class AllEventsView(APIView):
     permission_classes = [IsAuthenticated]
+
     def get(self, request):
         now = timezone.now()
         events = Events.objects.filter(date_time__gte=now).order_by("date_time")
         serializer = EventSerializer(events, many=True, context={"request": request})
 
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class TopEventsView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        now = timezone.now()
+
+        events = (
+            Events.objects.filter(date_time__gte=now)
+            .annotate(
+                reservation_count=Count("rsvps", filter=Q(rsvps__status="confirmed"))
+            )
+            .order_by("-reservation_count", "date_time")[:10]
+        )
+
+        serializer = EventSerializer(events, many=True, context={"request": request})
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 

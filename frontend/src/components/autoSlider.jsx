@@ -4,8 +4,10 @@ import cover from "../assets/images/cover.jpg";
 import cover1 from "../assets/images/cover1.jpg";
 import cover2 from "../assets/images/cover2.jpg";
 import cover3 from "../assets/images/cover3.jpg";
+import { useNavigate } from "react-router-dom";
 
 const HeroSlider = ({ events = [] }) => {
+  const navigate = useNavigate();
   const defaultSlides = [
     {
       img: cover,
@@ -73,7 +75,10 @@ const HeroSlider = ({ events = [] }) => {
               <p className="text-lg md:text-2xl opacity-90 max-w-2xl mb-6">
                 {slide.subtitle}
               </p>
-              <button className="px-6 py-3 bg-white/20 backdrop-blur-md rounded-lg text-white border border-white/40 hover:bg-white/30 transition">
+              <button
+                onClick={() => navigate(`/event/${events.id}/`)}
+                className="px-6 py-3 bg-white/20 backdrop-blur-md rounded-lg text-white border border-white/40 hover:bg-white/30 transition"
+              >
                 Attend →
               </button>
             </div>
