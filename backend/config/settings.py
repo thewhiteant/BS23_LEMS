@@ -1,6 +1,3 @@
-"""
-Django settings for backend project.
-"""
 
 from pathlib import Path
 from datetime import timedelta
