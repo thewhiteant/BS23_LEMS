@@ -8,7 +8,7 @@ SECRET_KEY = 'django-insecure-)99gyj)12g$9i(-)2)uninojxll!z&rax_@*2-!#=!9bl(zn2f
 
 DEBUG = True
 
-ALLOWED_HOSTS = ["*"]  # Allow frontend requests
+ALLOWED_HOSTS = ["https://bs23-lems.onrender.com/"]  # Allow frontend requests
 # For production: replace "*" with your domain
 
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
@@ -101,10 +101,8 @@ CORS_ALLOWED_ORIGINS = [
 ]
 
 CSRF_TRUSTED_ORIGINS = [
-    "http://localhost:3000",
+    "https://bs23-lems.onrender.com",
 ]
-
-
 
 
 
