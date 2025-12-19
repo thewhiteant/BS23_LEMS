@@ -24,6 +24,7 @@ import EventPage from "./pages/event/eventPage";
 import ProtectedRoute from "./components/protectedRoute";
 import Logout from "./components/logout";
 import InviteManagement from "./pages/admin/inviteManagement";
+import './index.css';
 
 const Unauthorized = () => (
   <div className="min-h-screen flex items-center justify-center text-2xl text-red-600">
