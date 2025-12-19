@@ -1,14 +1,20 @@
 
 from pathlib import Path
 from datetime import timedelta
+import os
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = 'django-insecure-)99gyj)12g$9i(-)2)uninojxll!z&rax_@*2-!#=!9bl(zn2f'
 
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = ["https://bs23-lems.onrender.com/"]  # Allow frontend requests
+ALLOWED_HOSTS = [
+    "127.0.0.1",
+    "localhost",
+    "bs23-lems.onrender.com",
+]
+  # Allow frontend requests
 # For production: replace "*" with your domain
 
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
@@ -57,8 +63,8 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
 
-    # CORS for React
     'corsheaders.middleware.CorsMiddleware',
 
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -69,13 +75,32 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+
 # ---------------------------------------------------------
 # CORS SETTINGS
 # ---------------------------------------------------------
 
-CORS_ALLOW_ALL_ORIGINS = True
+
+
 # Or restrict:
 # CORS_ALLOWED_ORIGINS = ["http://localhost:5173"]
+
+
+#cross origin resource sharing
+CORS_ALLOW_CREDENTIALS = True
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+    "http://localhost:5173",
+    "https://bs23-lems.onrender.com",
+]
+
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:3000",
+    "http://localhost:5173",
+    "https://bs23-lems.onrender.com",
+]
+
 
 
 # ---------------------------------------------------------
@@ -90,20 +115,6 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAuthenticated',
     )
 }
-
-
-
-#cross origin resource sharing
-CORS_ALLOW_CREDENTIALS = True
-
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",
-]
-
-CSRF_TRUSTED_ORIGINS = [
-    "https://bs23-lems.onrender.com",
-]
-
 
 
 
