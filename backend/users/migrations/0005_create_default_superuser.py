@@ -4,12 +4,12 @@ from django.db import migrations
 import os
 
 def create_superuser(apps, schema_editor):
-    User = apps.get_model("users", "User")
+    User = apps.get_model("users", "Users")
 
     username = os.environ.get("DJANGO_SUPERUSER_USERNAME")
     email = os.environ.get("DJANGO_SUPERUSER_EMAIL")
     password = os.environ.get("DJANGO_SUPERUSER_PASSWORD")
-
+   
     if not username or not password:
         return
 
@@ -28,4 +28,5 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+        migrations.RunPython(create_superuser),
     ]
