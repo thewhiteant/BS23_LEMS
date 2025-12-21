@@ -90,13 +90,13 @@ MIDDLEWARE = [
 CORS_ALLOW_CREDENTIALS = True
 
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",
+    "https://gapsitevent.netlify.app",
     "http://localhost:5173",
     "https://bs23-lems.onrender.com",
 ]
 
 CSRF_TRUSTED_ORIGINS = [
-    "http://localhost:3000",
+    "https://gapsitevent.netlify.app",
     "http://localhost:5173",
     "https://bs23-lems.onrender.com",
 ]
