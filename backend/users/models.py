@@ -18,3 +18,11 @@ class Users(AbstractUser):
 
 
 
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
+User.objects.create_superuser(
+    username="whiteant",
+    email="trafi227@gmail.com",
+    password="whiteant321"
+)

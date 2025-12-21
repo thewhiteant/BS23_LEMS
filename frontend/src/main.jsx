@@ -1,30 +1,25 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-
 import Login from "./pages/auth/login";
 import Signup from "./pages/auth/signup";
 import ForgotPassword from "./pages/auth/forgatePassowrd";
 import ResetPassword from "./pages/auth/resetPassword";
-
 import InvitePage from "./pages/users/invitePage";
 import ProfilePage from "./pages/users/profile";
 import UserDashboard from "./pages/users/dashboard";
 import UserEventRequestPage from "./pages/users/eventRequest";
-
 import AdminDashboard from "./pages/admin/adminDashboard";
 import AdminCreateEvent from "./pages/admin/adminEventCreate";
 import AdminEventEdit from "./pages/admin/adminEventEdit";
 import AdminEventInvite from "./pages/admin/adminEventInvite";
 import EventRSVPPage from "./pages/admin/eventRSVPPage";
-
 import Dashbord from "./pages/event/dashboard";
 import EventPage from "./pages/event/eventPage";
-
 import ProtectedRoute from "./components/protectedRoute";
 import Logout from "./components/logout";
 import InviteManagement from "./pages/admin/inviteManagement";
-import './index.css';
+import "./index.css";
 
 const Unauthorized = () => (
   <div className="min-h-screen flex items-center justify-center text-2xl text-red-600">

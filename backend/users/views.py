@@ -1,3 +1,4 @@
+from time import timezone
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -94,12 +95,11 @@ class ForgotPasswordRequest(APIView):
         user = Users.objects.filter(email=email).first()
         if not user:
             return Response({"message": ResponseMessages.INVALID_EMAIL}, status=400)
-
         otp = random.randint(100000, 999999)
         user.reset_otp = otp
         user.save()
-
-        send_mail_x.delay("Your Password Reset OTP", f"Your OTP is: {otp}", email)
+        # send_mail_x.delay("Your Password Reset OTP", f"Your OTP is: {otp}", email)
+        print(f"Time : {timezone.now()} Your OTP is: {otp} for email: {email}")  
 
         return Response({"message": ResponseMessages.OTP_SENT}, status=200)
 
