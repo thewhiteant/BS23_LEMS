@@ -1,7 +1,8 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "https://bs23-lems.onrender.com/",
+  // baseURL: "https://bs23-lems.onrender.com/",
+  baseURL: "http://localhost:8000/",
   timeout: 10000,
   headers: {
     "Content-Type": "application/json",
@@ -49,6 +50,7 @@ api.interceptors.response.use(
       try {
         const refreshResponse = await axios.post(
           "http://localhost:8000/user/token/refresh/",
+          // "https://bs23-lems.onrender.com/user/token/refresh/",
           {
             refresh: refreshToken,
           }
